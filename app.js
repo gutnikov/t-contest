@@ -49,8 +49,8 @@ class Chart {
         }, this);
         
         this.setXRange(this.x[0], this.x[this.x.length - 1]);
-        this.render = this.render.bind(this);
-        this.render();
+        this.update = this.update.bind(this);
+        this.update();
     }
 
     createCanvas(w, h, dpr) {
@@ -69,74 +69,87 @@ class Chart {
 
     setXRange(x0, x1) {
         // X range
+        this.prevX0 = this.x0;
+        this.prevX1 = this.x1;
         this.x0 = x0;
         this.x1 = x1;
-        // Determine index range
-        const i0 = this.x.findIndex(v => v >= x0) || 0;
-        const i1 = this.x.findIndex(v => v >= x1) || this.x.length - 1;
-
-        this.i0 = i0 === -1 ? 0 : i0;
-        this.i1 = i1 === -1 ? this.x.length - 1 : i1;
-
-        let yMax = 0;
-        Object.entries(this.lines).forEach(function([name, values]) {
-            const lineMax = values.slice(this.i0, this.i1).sort(desc)[0];
-            yMax = yMax > lineMax ? yMax : lineMax;
-        }, this);
-
-        this.sourceOffset = v2(this.x0, 0);
-        this.sourceArea = v2(this.x1 - this.x0, this.sourceArea ? this.sourceArea.y : 350);
-        this.factor = map(this.sourceArea, this.plotArea);
+        console.log(this.prevX0, this.x0);
     }
 
-    nextFrame() {
-        this.update();
-        requestAnimFrame(this.render);
-    }
-
-    fps() {
-        if (!this.fps)  {
-            this.fps = 1;
-            this.lastCall = Date.now();
-        }
-        if (Date.now() - this.lastCall > 1000) {
-            if (this.fps <= 50) {
-                console.log(`RPS is too low: ${this.fps}`);
-            }
-            this.fps = 0;
-            this.lastCall = Date.now();
-        }
-        this.rps++;
-    }
+//     fps() {
+//         if (!this.fps)  {
+//             this.fps = 1;
+//             this.lastCall = Date.now();
+//         }
+//         if (Date.now() - this.lastCall > 1000) {
+//             if (this.fps <= 50) {
+//                 console.log(`RPS is too low: ${this.fps}`);
+//             }
+//             this.fps = 0;
+//             this.lastCall = Date.now();
+//         }
+//         this.rps++;
+//     }
 
     update() {
-        if (!this.yAnimation) {
-            this.yAnimation = this.animateMaxY(320);
+        if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
+            const x0 = this.x0;
+            const x1 = this.x1;
+            // Determine index range
+            const i0 = this.x.findIndex(v => v >= x0) || 0;
+            const i1 = this.x.findIndex(v => v >= x1) || this.x.length - 1;
+
+            this.i0 = i0 === -1 ? 0 : i0;
+            this.i1 = i1 === -1 ? this.x.length - 1 : i1;
+
+            let yMax = 0;
+            Object.entries(this.lines).forEach(function([name, values]) {
+                const lineMax = values.slice(this.i0, this.i1 + 1).sort(desc)[0];
+                yMax = yMax > lineMax ? yMax : lineMax;
+            }, this);
+            this.prevYMax = this.yMax || 0;
+            this.yMax = yMax;
+
+            this.sourceOffset = v2(this.x0, 0);
+            this.sourceArea = v2(this.x1 - this.x0, this.sourceArea ? this.sourceArea.y : this.yMax);
+            this.factor = map(this.sourceArea, this.plotArea);
+
+            // run animation
+            if (this.yMax !== this.prevYMax) {
+                this.yAnimation = this.animateMaxY(this.yMax);
+            }
+            this.prevX0 = this.x0;
+            this.prevX1 = this.x1;
         }
-        const newArea = this.yAnimation();
-        // Finished?
-        if (newArea === null) {
-            this.yAnimation = this.animateMaxY(this.animateCount % 2 ? 650 : 320);
-            this.animateCount++;
-        } else {
-            this.sourceArea.y = newArea.y;
+
+        if (this.yAnimation) {
+            let newY = this.sourceArea.y;
+            const newArea = this.yAnimation(Date.now());
+            if (!newArea) {
+                this.yAnimation = null;
+            } else {
+                newY = newArea.y;
+            }
+            this.sourceArea.y = newY;
             this.factor = map(this.sourceArea, this.plotArea);
         }
+        this.render();
+        requestAnimFrame(this.update);
     }
 
     animateMaxY(y) {
         return animate(
             this.sourceArea,
             v2(this.sourceArea.x, y),
-            1,
-            easeOutQuint
+            0.50,
+            easeInOutQuart,
+            Date.now()
         );
     }
 
     render() {
         this.context2d.clearRect(0, 0, this.plotArea.x, this.plotArea.y);
         Object.keys(this.lines).forEach(this.renderLine, this);
-        this.nextFrame();
     }
 
     renderLine(name) {
@@ -327,10 +340,9 @@ const slider = new RangeSlider(function(min, max) {
 slider.mountTo(container);
 
 // Animation and easing functions
-function animate(v2from, v2to, durationSec, easingFn) {
-    const timeStarted = Date.now();
-    return function() {
-        const t = (Date.now() - timeStarted) / (durationSec * 1000);
+function animate(v2from, v2to, durationSec, easingFn, timeStarted) {
+    return function(now) {
+        const t = (now - timeStarted) / (durationSec * 1000);
         // Finished?
         if (t > 1) {
             return null;
