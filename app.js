@@ -1,11 +1,19 @@
 // TODO:
-// 1. Animation of lines
-// 2. Turning on/off lines
-// 3. Ask somebody to do buttons
-// 4. Rullers
-// 5. Main area dragging
-// 6. WebGL implementation
-// 7. SVG implementation
+// Animation of lines +
+// Turning on/off lines
+// Test on phones
+// Ask somebody to do buttons
+// Rullers
+// Main area dragging
+// WebGL implementation
+// SVG implementation
+
+// Bugs:
+// put close to each other
+
+// Small fixes:
+// Add paddings
+// Fix scaling so it always divided by 6 decently
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -17,11 +25,12 @@ window.requestAnimFrame = (function(){
 })();
 
 class Chart {
-    constructor(width, height, data) {
+    constructor(width, height, data, hasRulers) {
         this.dpr = window.devicePixelRatio || 1;
         this.dprFactor = v2(this.dpr, this.dpr);
         this.canvas = this.createCanvas(width, height, this.dpr);
         this.context2d = this.canvas.getContext('2d');
+        this.hasRulers = hasRulers;
 
         this.plotArea = v2(this.canvas.width, this.canvas.height);
 
@@ -32,6 +41,7 @@ class Chart {
         // Animate functions
         this.animateCount = 0;
         this.yAnimation = null;
+        this.t = 0;
 
         data.columns.forEach(function(line) {
             const name = line[0];
@@ -50,6 +60,12 @@ class Chart {
         
         this.setXRange(this.x[0], this.x[this.x.length - 1]);
         this.update = this.update.bind(this);
+        // sourceY, anim: in | out | null
+        this.rulers = {
+            in: [],
+            out: [],
+            done: []
+        };
         this.update();
     }
 
@@ -73,7 +89,6 @@ class Chart {
         this.prevX1 = this.x1;
         this.x0 = x0;
         this.x1 = x1;
-        console.log(this.prevX0, this.x0);
     }
 
 //     fps() {
@@ -117,6 +132,7 @@ class Chart {
             // run animation
             if (this.yMax !== this.prevYMax) {
                 this.yAnimation = this.animateMaxY(this.yMax);
+                this.updateRulers(this.yMax);
             }
             this.prevX0 = this.x0;
             this.prevX1 = this.x1;
@@ -124,11 +140,17 @@ class Chart {
 
         if (this.yAnimation) {
             let newY = this.sourceArea.y;
-            const newArea = this.yAnimation(Date.now());
-            if (!newArea) {
+            
+            const animResult = this.yAnimation(Date.now());
+            if (!animResult) {
+                this.t = 0;
                 this.yAnimation = null;
+                this.rulers.done = this.rulers.in;
+                this.rulers.out = [];
+                this.rulers.in = [];
             } else {
-                newY = newArea.y;
+                this.t = animResult[0];
+                newY = animResult[1].y;
             }
             this.sourceArea.y = newY;
             this.factor = map(this.sourceArea, this.plotArea);
@@ -141,7 +163,7 @@ class Chart {
         return animate(
             this.sourceArea,
             v2(this.sourceArea.x, y),
-            0.50,
+            0.60,
             easeInOutQuart,
             Date.now()
         );
@@ -149,6 +171,13 @@ class Chart {
 
     render() {
         this.context2d.clearRect(0, 0, this.plotArea.x, this.plotArea.y);
+        if (this.hasRulers) {
+            this.renderRulers();
+        }
+        this.renderLines();
+    }
+
+    renderLines() {
         Object.keys(this.lines).forEach(this.renderLine, this);
     }
 
@@ -198,29 +227,50 @@ class Chart {
                 this.context2d.lineTo(plotPoint.x,plotPoint.y);
             }
         }
-//         for (let i = this.i0; i <= this.i1; i++ ) {
-//             const plotPoint = invertY(
-//                 scale(
-//                     sub(
-//                         v2(this.x[i], ys[i]), 
-//                         this.sourceOffset
-//                     ),
-//                     this.factor
-//                 ), this.plotArea);
-//             if (i === this.i0) {
-//                 this.context2d.moveTo(plotPoint.x,plotPoint.y);
-//             } else {
-//                 this.context2d.lineTo(plotPoint.x,plotPoint.y);
-//             }
-//         }
         this.context2d.stroke();
+    }
+
+    updateRulers(yMax) {
+        this.rulers.out = this.rulers.done;
+        this.rulers.done = [];
+        this.rulers.in = [];
+        
+        const step = yMax / 6;
+        for (let i = 0; i < 6; i++ ) {
+            this.rulers.in[i] = {
+                y: step * i
+            };
+        }
+    }
+
+    renderRulers() {
+        this.rulers.in.forEach(r => this.renderRuler(r.y, easeInQuad(this.t)));
+        this.rulers.out.forEach(r => this.renderRuler(r.y, easeInQuad(1 - this.t)));
+        this.rulers.done.forEach(r => this.renderRuler(r.y, 1));
+    }
+
+    renderRuler(y, alpha) {
+        this.context2d.beginPath();
+        this.context2d.strokeStyle = `rgba(224, 224, 224, ${alpha})`;
+        this.context2d.lineWidth = 1 * this.dpr;
+        const rv = invertY(
+            scale(v2(0, y), this.factor
+            ), this.plotArea)
+        
+        this.context2d.moveTo(20, rv.y) ;
+        this.context2d.lineTo(this.plotArea.x, rv.y);
+        this.context2d.stroke();
+        this.context2d.font = "28px Arial";
+        this.context2d.fillStyle = `rgba(224, 224, 224, ${alpha})`;
+        this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
     }
 }
 
 const main = new Chart(
     600,
     400,
-    window.data[0]
+    window.data[0],
+    true
 );
 const ruler = new Chart(
     600,
@@ -349,7 +399,7 @@ function animate(v2from, v2to, durationSec, easingFn, timeStarted) {
         } else {
             const et = easingFn(t);
             const delta = sub(v2to, v2from);
-            return add(v2from, v2(delta.x * et, delta.y * et));
+            return [t, add(v2from, v2(delta.x * et, delta.y * et))];
         }
     }
 }
