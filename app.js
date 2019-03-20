@@ -1,21 +1,29 @@
 // TODO:
-// Turning line on/of animations
 // Main area dragging with canvas
-// Night mode
-// Add new buttons
-// Add paddings
-// Bug: put close to each other
-// Fix scaling so it always divided by 6 decently
-// Drag left handle, then drag right - causes scale to lag
+
+// Turning line on/of animations (fix anim fn)
+// V rules animations
 // Dates instead of numbers
+// main chart layout: padding on top + vrules on bottom
+// Vertical ruller showing current position
+
 // Canvas resizing
 // Calculate a number of vrules by the sccreen size
-// Button animations
-// Vertical ruller showing current position
-// Put all charts on a page
-// Chart headers
-// Use same colors as on demo
 
+// Use same colors as on demo (themes)
+
+// Fix scaling so it always divided by 6 decently
+// Add new buttons
+
+// Night mode for a page
+// Header
+// Buttons
+// Button animations
+
+// Bug: put close to each other
+// Drag left handle, then drag right - causes scale to lag
+
+// Put all charts on a page
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
