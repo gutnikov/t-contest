@@ -34,6 +34,154 @@ window.requestAnimFrame = (function(){
           };
 })();
 
+// mainColor
+// borderColor
+// borderTopBottom
+// borderLeftRight
+class Ruler {
+	constructor(config) {
+		Object.assign(this, config, {
+			leftDown: false,
+			rightDown: false,
+			mainDown: false,
+			counter: 0
+		});
+		this.canvas = createCanvas(
+			this.width,
+			this.height);
+		this.setEvents();
+		this.render = this.render.bind(this);
+		this.render();
+	}
+
+	render() {
+		var ctx = this.canvas.getContext("2d");
+		ctx.clearRect(0, 0, this.width, this.height);
+
+		ctx.fillStyle = this.theme.mainColor;
+		ctx.fillRect(0, 0, this.width * this.left, this.height);
+		ctx.fillRect(
+			this.width * this.right, 0, 
+			this.width * (1 - this.right), this.height);
+
+
+// 		ctx.strokeStyle = this.theme.borderColor;
+// 		ctx.lineWidth = 6; //this.theme.border[0];
+
+// 		ctx.moveTo(this.width * this.left + this.theme.border[0]/2, 0);
+// 		ctx.lineTo(this.width * this.right - this.theme.border[0]/2, 0);
+// 		ctx.stroke();
+
+// 		ctx.moveTo(this.width * this.left + this.theme.border[0]/2, this.height);
+// 		ctx.lineTo(this.width * this.right - this.theme.border[0]/2, this.height)
+// 		ctx.stroke();
+
+// 		ctx.lineWidth = this.theme.border[1];
+// 		ctx.moveTo(this.width * this.right - this.theme.border[1]/2, 0);
+// 		ctx.lineTo(this.width * this.right - this.theme.border[1]/2, this.height);
+// 		ctx.moveTo(this.width * this.left + this.theme.border[1]/2, 0);
+// 		ctx.lineTo(this.width * this.left + this.theme.border[1]/2, this.height);
+		requestAnimFrame(this.render);
+	}
+
+	setEvents() {
+		const self = this;
+		this.canvas.addEventListener("mousedown", function (e) {
+			const cords = self.cords(e);
+			self.downState = {
+				cords,
+				left: self.left,
+				right: self.right
+			};
+			console.log(cords);
+			if (inRect(cords.x, cords.y, {
+				left: self.width * self.left - self.touchAreaWidth,
+				right: self.width * self.left,
+				top: 0,
+				bottom: self.height
+			})) {
+				self.leftDown = true;
+			}
+			if (inRect(cords.x, cords.y, {
+				left: self.width * self.right,
+				right: self.width * self.right + self.touchAreaWidth,
+				top: 0,
+				bottom: self.height
+			})) {
+				self.rightDown = true;
+			}
+			if (inRect(cords.x, cords.y, {
+				left: self.width * self.left,
+				right: self.width * self.right,
+				top: 0,
+				bottom: self.height
+			})) {
+				self.mainDown = true;
+			}
+		}, false);
+
+		this.canvas.addEventListener("mouseup", function (e) {
+			self.leftDown = self.rightDown = self.mainDown = false;
+		}, false);
+
+		this.canvas.addEventListener("mousemove", function (e) {
+			const cords = self.cords(e);
+			if (self.leftDown) {
+				const offset = sub(cords, self.downState.cords).x;
+				const left = (self.width * self.downState.left + offset)/self.width;
+				self.left = Math.min(self.right, left);
+			}
+			if (self.rightDown) {
+				const offset = sub(cords, self.downState.cords).x;
+				const right = (self.width * self.downState.right + offset)/self.width;
+				self.right = Math.max(self.left, right);
+			}
+			if (self.mainDown) {
+				const offset = sub(cords, self.downState.cords).x;
+				let left = (self.width * self.downState.left + offset)/self.width;
+				let right = (self.width * self.downState.right + offset)/self.width;
+				self.left = left;
+				self.right = right;
+			}
+		}, false);
+	}
+
+	cords(e) {
+		var rect = this.canvas.getBoundingClientRect();
+		return v2((e.clientX - rect.left) * dpr,
+			(e.clientY - rect.top) * dpr);
+	}
+}
+
+const dpr = window.devicePixelRatio || 1;
+
+const r = new Ruler({
+	width: 400 * dpr,
+	height: 50 * dpr,
+	theme: {
+		mainColor: 'rgba(0,0,0,0.3)',
+		borderColor: 'rgba(0,0,0, 0.5)',
+		border: [1 * dpr, 6 * dpr]
+	},
+	left: 0.1,
+	right: 0.45,
+	touchAreaWidth: 30
+});
+r.canvas.style = 'width: 400px; height: 50px';
+document.body.appendChild(r.canvas);
+
+
+
+function createCanvas(w, h) {
+	const canvas = document.createElement('canvas');
+	canvas.width = w;
+	canvas.height = h;
+// 	canvas.style = `width: ${w}px; height: ${h}px`;
+// 	canvas.style = style;
+	return canvas;
+}
+
+
 class Chart {
     constructor(width, height, data, hasRulers) {
         this.dpr = window.devicePixelRatio || 1;
