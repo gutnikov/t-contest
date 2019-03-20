@@ -1,19 +1,21 @@
 // TODO:
-// Animation of lines +
-// Turning on/off lines
-// Test on phones
-// Ask somebody to do buttons
-// Rullers
-// Main area dragging
-// WebGL implementation
-// SVG implementation
-
-// Bugs:
-// put close to each other
-
-// Small fixes:
+// Turning line on/of animations
+// Main area dragging with canvas
+// Night mode
+// Add new buttons
 // Add paddings
+// Bug: put close to each other
 // Fix scaling so it always divided by 6 decently
+// Drag left handle, then drag right - causes scale to lag
+// Dates instead of numbers
+// Canvas resizing
+// Calculate a number of vrules by the sccreen size
+// Button animations
+// Vertical ruller showing current position
+// Put all charts on a page
+// Chart headers
+// Use same colors as on demo
+
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -31,6 +33,10 @@ class Chart {
         this.canvas = this.createCanvas(width, height, this.dpr);
         this.context2d = this.canvas.getContext('2d');
         this.hasRulers = hasRulers;
+        this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names).reduce(function(all, key){
+            all[key] = true;
+            return all;
+        }, {});
 
         this.plotArea = v2(this.canvas.width, this.canvas.height);
 
@@ -59,6 +65,13 @@ class Chart {
         }, this);
         
         this.setXRange(this.x[0], this.x[this.x.length - 1]);
+
+        this.vRules = {
+            in: [],
+            out: [],
+            done: this.getVSteps(0, this.x.length - 1)
+        }
+
         this.update = this.update.bind(this);
         // sourceY, anim: in | out | null
         this.rulers = {
@@ -66,6 +79,7 @@ class Chart {
             out: [],
             done: []
         };
+
         this.update();
     }
 
@@ -106,8 +120,25 @@ class Chart {
 //         this.rps++;
 //     }
 
+    linesChanged() {
+        const before = Object.entries(this.prevLinesEnabled).map(entry => entry[1]).join(',');
+        const after = Object.entries(this.linesEnabled).map(entry => entry[1]).join(',');
+        return before !== after;
+    }
+
+    getVSteps(i0, i1, inv) {
+        return inv ? steps(i1, i0, -1) : steps(i0, i1);
+    }
+
+    updateVRules(i0, i1) {
+        const steps = this.getVSteps(i0, i1, this.prevX0 !== this.x0);
+//         console.log(this.vRules.done.join(','));
+//         console.log(steps.join(','));
+        this.vRules.done = steps;
+    }
+
     update() {
-        if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
+        if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1 || this.linesChanged()) {
             const x0 = this.x0;
             const x1 = this.x1;
             // Determine index range
@@ -117,8 +148,15 @@ class Chart {
             this.i0 = i0 === -1 ? 0 : i0;
             this.i1 = i1 === -1 ? this.x.length - 1 : i1;
 
+            if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
+                this.updateVRules(this.i0, this.i1);
+            }
+
+
             let yMax = 0;
-            Object.entries(this.lines).forEach(function([name, values]) {
+            Object.entries(this.lines)
+                .filter(function([name]) { return this.linesEnabled[name] }, this)
+                .forEach(function([name, values]) {
                 const lineMax = values.slice(this.i0, this.i1 + 1).sort(desc)[0];
                 yMax = yMax > lineMax ? yMax : lineMax;
             }, this);
@@ -136,6 +174,7 @@ class Chart {
             }
             this.prevX0 = this.x0;
             this.prevX1 = this.x1;
+            this.prevLinesEnabled = this.linesEnabled;
         }
 
         if (this.yAnimation) {
@@ -155,6 +194,20 @@ class Chart {
             this.sourceArea.y = newY;
             this.factor = map(this.sourceArea, this.plotArea);
         }
+
+        if (this.vRulesAnimation) {
+            const vResult = this.vRulesAnimation(Date.now());
+            if (!vResult) {
+                this.vt = 0;
+                this.vRulesAnimation = null;
+                this.vRules.done = this.vRules.in;
+                this.vRules.out = [];
+                this.vRules.in = [];
+            } else {
+                this.vt = vResult[0];
+            }
+        }
+
         this.render();
         requestAnimFrame(this.update);
     }
@@ -173,12 +226,15 @@ class Chart {
         this.context2d.clearRect(0, 0, this.plotArea.x, this.plotArea.y);
         if (this.hasRulers) {
             this.renderRulers();
+            this.renderVRulers();
         }
         this.renderLines();
     }
 
     renderLines() {
-        Object.keys(this.lines).forEach(this.renderLine, this);
+        Object.keys(this.lines)
+            .filter(function(name) { return this.linesEnabled[name] }, this)
+            .forEach(this.renderLine, this);
     }
 
     renderLine(name) {
@@ -243,6 +299,22 @@ class Chart {
         }
     }
 
+    renderVRulers() {
+        this.vRules.in.forEach(r => this.renderVRuler(r, linear(this.vt)));
+        this.vRules.out.forEach(r => this.renderVRuler(r, linear(1 - this.vt)));
+        this.vRules.done.forEach(r => this.renderVRuler(r, 1));
+    }
+
+    renderVRuler(i, alpha) {
+        const x = this.x[i];
+        const v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
+
+        this.context2d.font = "28px Arial";
+        this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+        this.context2d.fillText(String(Math.ceil(i)), v.x, this.plotArea.y - 20);
+
+    }
+
     renderRulers() {
         this.rulers.in.forEach(r => this.renderRuler(r.y, easeInQuad(this.t)));
         this.rulers.out.forEach(r => this.renderRuler(r.y, easeInQuad(1 - this.t)));
@@ -261,8 +333,15 @@ class Chart {
         this.context2d.lineTo(this.plotArea.x, rv.y);
         this.context2d.stroke();
         this.context2d.font = "28px Arial";
-        this.context2d.fillStyle = `rgba(224, 224, 224, ${alpha})`;
+        this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
         this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
+    }
+
+    setLineEnabled(name, isEnabled) {
+        this.prevLinesEnabled = this.linesEnabled;
+        this.linesEnabled = Object.assign({}, this.linesEnabled, {
+            [name]: isEnabled
+        });
     }
 }
 
@@ -310,8 +389,8 @@ class RangeSlider {
         const main = this.element.querySelectorAll('.main-area')[0];
 
         const self = this;
-        setLeftHandle(0.3);
-        setRightHandle(0.3);
+        setLeftHandle(0.0);
+        setRightHandle(0.9);
 
         // Dragging main area
         document.addEventListener('mousedown', function(event) {
@@ -376,9 +455,27 @@ class RangeSlider {
     }
 }
 
-function inRect(x, y, rect) {
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+class Buttons {
+    constructor(names, onChange) {
+        this.names = names;
+        this.onChange = onChange || function(){};
+        this.element = document.createElement('div');
+        const buttons = names.map(item => `<label><input type="checkbox" name="${item.id}" checked="true">${item.name}</label>`);
+        this.element.innerHTML = buttons.join('');
+    }
+
+    mountTo(parent) {
+        parent.appendChild(this.element);
+        this.names.forEach(function(item) {
+            this.element.querySelector(`input[name=${item.id}]`).addEventListener('change', this.handleChange.bind(this));
+        }, this);
+    }
+
+    handleChange(event) {
+        this.onChange(event.target.name, event.target.checked);
+    }
 }
+
 
 const container = document.getElementById('chart');
 container.appendChild(main.canvas);
@@ -388,6 +485,14 @@ const slider = new RangeSlider(function(min, max) {
     main.setPctRange(min, max);
 });
 slider.mountTo(container);
+const buttons = new Buttons(
+    Object.entries(window.data[0].names).map(function(e){ return {id: e[0], name: e[1]}}),
+    function(name, value) {
+        main.setLineEnabled(name, value);
+        ruler.setLineEnabled(name, value);
+    }
+    );
+buttons.mountTo(container);
 
 // Animation and easing functions
 function animate(v2from, v2to, durationSec, easingFn, timeStarted) {
@@ -466,9 +571,29 @@ function desc(a, b) {
     return a < b ? 1 : -1;
 }
 
+function inRect(x, y, rect) {
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
 // Line point
 function linePoint(p1, p2, x) {
     const y = ((p1.x * p2.y - p2.x * p1.y) + (p1.y - p2.y)*x)/(-(p2.x - p1.x));
     return v2(x,y);
 }
 
+function range(first, step, count) {
+    let result = [];
+    for (let i = 0; i < count; i++) {
+        result.push(first + i * step);
+    }
+    return result;
+}
+
+function steps(first, last, step = 1, size = 8) {
+    let count = Math.ceil((last - first)/step);
+    if ( count < size ) {
+        return range(first, step, count);
+    } else {
+        return steps(first, last, step * 2, size);
+    }
+}
