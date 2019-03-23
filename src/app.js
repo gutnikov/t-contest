@@ -372,11 +372,11 @@ class ChartCanvas {
             0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
             this.plotArea.y + this.plotAreaPadding.y * 2);
         if (this.hasRulers) {
-            // this.renderYRulers();
-            // this.renderXRulers();
+            this.renderYRulers();
+            this.renderXRulers();
         }
         this.renderLines();
-        // this.renderTooltip(10);
+        this.renderTooltip(10);
         this.fps();
     }
 
