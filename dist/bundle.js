@@ -455,6 +455,7 @@ var ChartCanvas = function () {
 
         this.lastUpdate = Date.now();
         this.setEvents();
+        this.bodyNoScroll();
         this.update = this.update.bind(this);
         this.render();
         this.update();
@@ -481,6 +482,26 @@ var ChartCanvas = function () {
             this.canvas.addEventListener('mouseout', function (e) {
                 this.iHover = null;
             }.bind(this));
+        }
+    }, {
+        key: 'bodyNoScroll',
+        value: function bodyNoScroll() {
+            var canvas = this.canvas;
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
         }
     }, {
         key: 'setSize',

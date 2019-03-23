@@ -73,6 +73,7 @@ class ChartCanvas {
 
         this.lastUpdate = Date.now();
         this.setEvents();
+        this.bodyNoScroll();
         this.update = this.update.bind(this);
         this.render();
         this.update();
@@ -98,6 +99,25 @@ class ChartCanvas {
         this.canvas.addEventListener('mouseout', function(e) {
             this.iHover = null;
         }.bind(this));
+    }
+
+    bodyNoScroll() {
+        let canvas = this.canvas;
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
     }
 
     setSize(w, h) {
