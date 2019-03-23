@@ -36,6 +36,7 @@ class ChartCanvas {
             all[key] = true;
             return all;
         }, {});
+        this.linesChanged = false;
 
         // Canvas
         this.canvas = createCanvas(width, height);
@@ -114,6 +115,7 @@ class ChartCanvas {
         this.linesEnabled = Object.assign({}, this.linesEnabled, {
             [name]: isEnabled
         });
+        this.linesChanged = true;
     }
 
     setFromPct() {
@@ -279,7 +281,7 @@ class ChartCanvas {
 
     update() {
 		// Update animation timings
-        if (this.updateTimings() || this.inputChanged()) {
+        if (this.updateTimings() || this.inputChanged() || this.linesChanged) {
             this.setFromPct();
             this.setPlotPoints();
             // run animation
@@ -301,6 +303,7 @@ class ChartCanvas {
             this.prevSourceHeight = this.sourceHeight;
             this.prevI0 = this.i0;
             this.prevI1 = this.i1;
+            this.linesChanged = false;
         }
         this.render();
         requestAnimFrame(this.update);
@@ -426,7 +429,7 @@ class ChartCanvas {
         this.context2d.stroke();
         this.context2d.font = "28px Arial";
         this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-        this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 35);
+        this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
     }
 
     renderTooltip() {

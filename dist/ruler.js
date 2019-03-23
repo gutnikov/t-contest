@@ -19,6 +19,8 @@ var Ruler = function () {
             counter: 0
         });
         this.canvas = createCanvas(this.width, this.height, 1);
+        this.prevLeft = -1;
+        this.prevRight = -1;
         this.getTouchCords = this.getTouchCords.bind(this);
         this.getMouseCords = this.getMouseCords.bind(this);
         this.setEvents();
@@ -41,16 +43,21 @@ var Ruler = function () {
     }, {
         key: "render",
         value: function render() {
-            var ctx = this.canvas.getContext("2d");
-            ctx.clearRect(0, 0, this.width, this.height);
-            ctx.fillStyle = this.theme.mainColor;
-            ctx.fillRect(0, 0, this.width * this.left, this.height);
-            ctx.fillRect(this.width * this.right, 0, this.width * (1 - this.right), this.height);
-            ctx.fillStyle = this.theme.borderColor;
-            ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.theme.border[0]);
-            ctx.fillRect(this.width * this.left, this.height - this.theme.border[0], this.width * (this.right - this.left), this.theme.border[0]);
-            ctx.fillRect(this.width * this.left, 0, this.theme.border[1], this.height);
-            ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
+            if (this.left !== this.prevLeft || this.right !== this.prevRight) {
+                var ctx = this.canvas.getContext("2d");
+                ctx.clearRect(0, 0, this.width, this.height);
+                ctx.fillStyle = this.theme.mainColor;
+                ctx.fillRect(0, 0, this.width * this.left, this.height);
+                ctx.fillRect(this.width * this.right, 0, this.width * (1 - this.right), this.height);
+                ctx.fillStyle = this.theme.borderColor;
+                ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.theme.border[0]);
+                ctx.fillRect(this.width * this.left, this.height - this.theme.border[0], this.width * (this.right - this.left), this.theme.border[0]);
+                ctx.fillRect(this.width * this.left, 0, this.theme.border[1], this.height);
+                ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
+                this.prevLeft = this.left;
+                this.prevRight = this.right;
+                console.log('rendering');
+            }
             requestAnimFrame(this.render);
         }
     }, {

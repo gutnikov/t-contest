@@ -50,6 +50,7 @@ var ChartCanvas = function () {
             all[key] = true;
             return all;
         }, {});
+        this.linesChanged = false;
 
         // Canvas
         this.canvas = createCanvas(width, height);
@@ -126,6 +127,7 @@ var ChartCanvas = function () {
         value: function setLineEnabled(name, isEnabled) {
             this.prevLinesEnabled = this.linesEnabled;
             this.linesEnabled = Object.assign({}, this.linesEnabled, _defineProperty({}, name, isEnabled));
+            this.linesChanged = true;
         }
     }, {
         key: 'setFromPct',
@@ -274,7 +276,7 @@ var ChartCanvas = function () {
         key: 'update',
         value: function update() {
             // Update animation timings
-            if (this.updateTimings() || this.inputChanged()) {
+            if (this.updateTimings() || this.inputChanged() || this.linesChanged) {
                 this.setFromPct();
                 this.setPlotPoints();
                 // run animation
@@ -296,6 +298,7 @@ var ChartCanvas = function () {
                 this.prevSourceHeight = this.sourceHeight;
                 this.prevI0 = this.i0;
                 this.prevI1 = this.i1;
+                this.linesChanged = false;
             }
             this.render();
             requestAnimFrame(this.update);
@@ -448,7 +451,7 @@ var ChartCanvas = function () {
             this.context2d.stroke();
             this.context2d.font = "28px Arial";
             this.context2d.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
-            this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 35);
+            this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
         }
     }, {
         key: 'renderTooltip',
