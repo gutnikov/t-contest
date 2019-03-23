@@ -279,7 +279,7 @@ class ChartCanvas {
 
     update() {
 		// Update animation timings
-        if (this.inputChanged() || this.updateTimings()) {
+        if (this.updateTimings() || this.inputChanged()) {
             this.setFromPct();
             this.setPlotPoints();
             // run animation
