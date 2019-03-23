@@ -350,14 +350,14 @@ class ChartCanvas {
     }
 
     render() {
-        // this.context2d.clearRect(
-        //     0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
-        //     this.plotArea.y + this.plotAreaPadding.y * 2);
+        this.context2d.clearRect(
+            0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
+            this.plotArea.y + this.plotAreaPadding.y * 2);
         if (this.hasRulers) {
             // this.renderYRulers();
             // this.renderXRulers();
         }
-        // this.renderLines();
+        this.renderLines();
         // this.renderTooltip(10);
         // console.log('render');
         this.fps();
