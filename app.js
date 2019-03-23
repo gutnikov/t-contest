@@ -1,7 +1,7 @@
 // blinking numbers
 // Canvas resize breaks ruler
-// Use same colors as on demo (themes)
 // Night mode for a page
+// Use same colors as on demo (themes)
 
 class ChartCanvas {
     constructor(width, height, data, hasRulers, p0, p1) {
@@ -446,8 +446,8 @@ class ChartCanvas {
         ctx.beginPath();
         ctx.strokeStyle = `rgba(224, 224, 224)`;
         ctx.lineWidth = 1 * getDpr();
-        ctx.moveTo(anyPoint.p.x, 0) ;
-        ctx.lineTo(anyPoint.p.x, this.plotArea.y);
+        ctx.moveTo(anyPoint.p.x, 0 + this.plotAreaPadding.y) ;
+        ctx.lineTo(anyPoint.p.x, this.plotArea.y + this.plotAreaPadding.y);
         ctx.stroke();
         ctx.lineWidth = 2 * getDpr();
 
