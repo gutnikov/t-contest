@@ -68,28 +68,28 @@ class Ruler {
             right: this.right
         };
         if (inRect(cords.x, cords.y, {
+            left: this.width * this.left + this.theme.border[1] * 3,
+            right: this.width * this.right - this.theme.border[1] * 3,
+            top: 0,
+            bottom: this.height
+        })) {
+            this.mainDown = true;
+        }
+        else if (inRect(cords.x, cords.y, {
             left: this.width * this.left - this.touchAreaWidth,
-            right: this.width * this.left,
+            right: this.width * this.left + this.theme.border[1] * 3,
             top: 0,
             bottom: this.height
         })) {
             this.leftDown = true;
         }
-        if (inRect(cords.x, cords.y, {
-            left: this.width * this.right,
+        else if (inRect(cords.x, cords.y, {
+            left: this.width * this.right - this.theme.border[1] * 3,
             right: this.width * this.right + this.touchAreaWidth,
             top: 0,
             bottom: this.height
         })) {
             this.rightDown = true;
-        }
-        if (inRect(cords.x, cords.y, {
-            left: this.width * this.left,
-            right: this.width * this.right,
-            top: 0,
-            bottom: this.height
-        })) {
-            this.mainDown = true;
         }
     }
 
@@ -102,17 +102,23 @@ class Ruler {
         if (this.leftDown) {
             const offset = sub(cords, this.downState.cords).x;
             const left = (this.width * this.downState.left + offset)/this.width;
-            this.left = Math.min(this.right - this.minMainArea, left);
+            this.left = Math.max(0,Math.min(this.right - this.minMainArea, left));
             this.handleChange(this.left, this.right);
         }
         if (this.rightDown) {
             const offset = sub(cords, this.downState.cords).x;
             const right = (this.width * this.downState.right + offset)/this.width;
-            this.right = Math.max(this.left + this.minMainArea, right);
+            this.right = Math.min(1, Math.max(this.left + this.minMainArea, right));
             this.handleChange(this.left, this.right);
         }
         if (this.mainDown) {
-            const offset = sub(cords, this.downState.cords).x;
+            let offset = sub(cords, this.downState.cords).x;
+            if (this.width * this.downState.left + offset < 0) {
+                offset = -(this.width * this.downState.left);
+            }
+            if (this.width * this.downState.right + offset > this.width) {
+                offset = this.width * (1 - this.downState.right);
+            }
             let left = (this.width * this.downState.left + offset)/this.width;
             let right = (this.width * this.downState.right + offset)/this.width;
             if (left >= 0 && right <= 1) {

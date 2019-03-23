@@ -1,9 +1,5 @@
-// TODO:
-// Range boundaries not always goes to 0
-// Mouse variant exceeds min/max area
-// Canvas resize breaks ruler
 // blinking numbers
-
+// Canvas resize breaks ruler
 // Use same colors as on demo (themes)
 // Night mode for a page
 
@@ -460,7 +456,7 @@ class ChartCanvas {
             const p = points[name].p;
             const t = this.timing('line:' + name);
             let alpha =  t ? t() : 1;
-            ctx.fillStyle = 'rgba(255,255,255)';
+            ctx.fillStyle = withAlpha('rgba(255,255,255,alpha)', this.linesEnabled[name] ? 1 : 1 - alpha);
             ctx.strokeStyle = withAlpha(
                 this.rgbaColors[name],
                 easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
