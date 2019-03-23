@@ -45,8 +45,8 @@ class ChartCanvas {
             this.canvas.width - this.plotAreaPadding.x * 2,
             this.canvas.height - this.plotAreaPadding.y * 2);
 
-        this.yRangeSteps = 6;
-        this.xRangeSteps = 6;
+        this.yRangeSteps = 5;
+        this.xRangeSteps = 9;
         this.stepsScale = stepsScale(0, this.x.length - 1, this.xRangeSteps);
 
         this.p0 = p0;
@@ -372,7 +372,7 @@ class ChartCanvas {
             this.rgbaColors[name],
             easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
         );
-        this.context2d.lineWidth = 2.5 * getDpr();
+        this.context2d.lineWidth = 8 * getDpr();
         for (let i = 0; i < points.length; i++ ) {
             const p = points[i][1];
             if (i === 0) {
@@ -515,10 +515,10 @@ function chartAt(parent, data) {
     const width = rect.width;
     const height = width * (2/3);
     const mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
-    const rulerCanvas = new ChartCanvas(width, 50, data, false, 0, 1);
+    const rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
     const ruler = new Ruler({
         width: rect.width * getDpr(),
-        height: 50 * getDpr(),
+        height: 100 * getDpr(),
         theme: {
             mainColor: 'rgba(0,0,0,0.3)',
             borderColor: 'rgba(0,0,0, 0.5)',
@@ -536,7 +536,7 @@ function chartAt(parent, data) {
         mainCanvas.setLineEnabled(name, value);
         rulerCanvas.setLineEnabled(name, value);
     });
-    ruler.canvas.style = `width: ${rect.width}px; height: ${50}px`;
+    ruler.canvas.style = `width: ${rect.width}px; height: ${100}px`;
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(ruler.canvas);
