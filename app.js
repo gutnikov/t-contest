@@ -521,7 +521,7 @@ function chartAt(parent, data) {
     const width = rect.width;
     const height = width * (2/3);
     const mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
-    // const rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
+    const rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
     const ruler = new Ruler({
         width: rect.width * getDpr(),
         height: 100 * getDpr(),
@@ -540,11 +540,11 @@ function chartAt(parent, data) {
     });
     const buttons = new Buttons(data, function(name, value) {
         mainCanvas.setLineEnabled(name, value);
-        // rulerCanvas.setLineEnabled(name, value);
+        rulerCanvas.setLineEnabled(name, value);
     });
     ruler.canvas.style = `width: ${rect.width}px; height: ${100}px`;
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
-    // element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
+    element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(ruler.canvas);
     element.querySelector('.chart-buttons').appendChild(buttons.element);
     // window.addEventListener('resize', function() {
