@@ -302,7 +302,6 @@ class ChartCanvas {
     }
 
     handleXRangeChanged() {
-        console.log(this.i0, this.i1, this.x0, this.x1);
         const wt = this.timing('changeWidth');
         if (!wt || wt() === 1) {
             this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
