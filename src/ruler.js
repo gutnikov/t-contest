@@ -8,6 +8,8 @@ class Ruler {
             leftDown: false,
             rightDown: false,
             mainDown: false,
+            borderTop: 1 * getDpr(),
+            borderSide: 6 * getDpr(),
             counter: 0
         });
         this.canvas = createCanvas(
@@ -39,16 +41,16 @@ class Ruler {
         if (this.left !== this.prevLeft || this.right !== this.prevRight) {
             let ctx = this.canvas.getContext("2d");
             ctx.clearRect(0, 0, this.width, this.height);
-            ctx.fillStyle = this.theme.mainColor;
+            ctx.fillStyle = withAlpha(this.theme.get('border2'), 0.2);
             ctx.fillRect(0, 0, this.width * this.left, this.height);
             ctx.fillRect(
                 this.width * this.right, 0,
                 this.width * (1 - this.right), this.height);
-            ctx.fillStyle = this.theme.borderColor;
-            ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.theme.border[0]);
-            ctx.fillRect(this.width * this.left, this.height - this.theme.border[0], this.width * (this.right - this.left), this.theme.border[0]);
-            ctx.fillRect(this.width * this.left, 0, this.theme.border[1], this.height);
-            ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
+            ctx.fillStyle = withAlpha(this.theme.get('border2'), 0.5);
+            ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.borderTop);
+            ctx.fillRect(this.width * this.left, this.height - this.borderTop, this.width * (this.right - this.left), this.borderTop);
+            ctx.fillRect(this.width * this.left, 0, this.borderSide, this.height);
+            ctx.fillRect(this.width * this.right - this.borderSide, 0, this.borderSide, this.height);
             this.prevLeft = this.left;
             this.prevRight = this.right;
         }
@@ -95,8 +97,8 @@ class Ruler {
             right: this.right
         };
         if (inRect(cords.x, cords.y, {
-            left: this.width * this.left + this.theme.border[1] * 3,
-            right: this.width * this.right - this.theme.border[1] * 3,
+            left: this.width * this.left + this.borderSide * 3,
+            right: this.width * this.right - this.borderSide * 3,
             top: 0,
             bottom: this.height
         })) {
@@ -104,14 +106,14 @@ class Ruler {
         }
         else if (inRect(cords.x, cords.y, {
             left: this.width * this.left - this.touchAreaWidth,
-            right: this.width * this.left + this.theme.border[1] * 3,
+            right: this.width * this.left + this.borderSide * 3,
             top: 0,
             bottom: this.height
         })) {
             this.leftDown = true;
         }
         else if (inRect(cords.x, cords.y, {
-            left: this.width * this.right - this.theme.border[1] * 3,
+            left: this.width * this.right - this.borderSide * 3,
             right: this.width * this.right + this.touchAreaWidth,
             top: 0,
             bottom: this.height

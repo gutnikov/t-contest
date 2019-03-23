@@ -10,6 +10,16 @@
             font-family: Arial;
         }
 
+        body.theme-light {
+            background-color: white;
+            color: black;
+        }
+
+        body.theme-dark {
+            background-color: #242f3d;
+            color: white;
+        }
+
         #container {
             max-width: 600px;
             margin: 0 auto;
@@ -34,8 +44,8 @@
 
         .chart-header {
             font-weight: bold;
-            font-size: 23px;
-            padding: 10px 20px 25px;
+            font-size: 32px;
+            padding: 10px 20px 5px;
         }
 
         .tl_graphic_buttons {
@@ -52,12 +62,21 @@
         .tl_graphic_button {
             display: flex;
             overflow: hidden;
-            border: 2px solid #e6ecf0;
             border-radius: 50px;
             padding: 10px 15px 10px 5px;
             -webkit-align-items: center;
             align-items: center;
+            cursor: pointer;
         }
+
+        .theme-dark .tl_graphic_button {
+            border: 2px solid #425061;
+        }
+
+        .theme-light .tl_graphic_button {
+            border: 1px solid #d1d3d6;
+        }
+
         .tl_checkbox_container {
             position: absolute;
             width: 20px;
@@ -106,7 +125,8 @@
             font-family: Arial;
             margin-left: 40px;
             font-size: 15px;
-            color: #43484b;
+            /* color: #43484b; */
+            cursor: pointer;
         }
 
     </style>
@@ -116,11 +136,13 @@
     <div id="fps">FPS</div>
 </div>
 <script src="src/data.js"></script>
-<!--<script src="src/base.js"></script>-->
-<!--<script src="src/buttons.js"></script>-->
-<!--<script src="src/ruler.js"></script>-->
-<!--<script src="src/app.js"></script>-->
-<script src="dist/app.minified.js"></script>
+<script src="src/base.js"></script>
+<script src="src/theme.js"></script>
+<script src="src/buttons.js"></script>
+<script src="src/ruler.js"></script>
+<script src="src/canvas.js"></script>
+<script src="src/app.js"></script>
+<!--<script src="dist/app.minified.js"></script>-->
 
 </body>
 </html>
