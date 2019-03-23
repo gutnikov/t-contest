@@ -552,8 +552,8 @@ function chartAt(parent, data) {
         mainCanvas.setLineEnabled(name, value);
         rulerCanvas.setLineEnabled(name, value);
     });
-    ruler.canvas.width = rect.width + 'px';
-    ruler.canvas.height = '50px';
+    ruler.canvas.style.width = rect.width + 'px';
+    ruler.canvas.style.height = '50px';
 
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
