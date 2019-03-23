@@ -207,20 +207,18 @@ class ChartCanvas {
         return [x, i];
     }
 
-//     fps() {
-//         if (!this.fps)  {
-//             this.fps = 1;
-//             this.lastCall = Date.now();
-//         }
-//         if (Date.now() - this.lastCall > 1000) {
-//             if (this.fps <= 50) {
-//                 console.log(`RPS is too low: ${this.fps}`);
-//             }
-//             this.fps = 0;
-//             this.lastCall = Date.now();
-//         }
-//         this.rps++;
-//     }
+    fps() {
+        if (!this.curFps)  {
+            this.curFps = 1;
+            this.lastCall = Date.now();
+        }
+        if (Date.now() - this.lastCall > 1000) {
+            document.getElementById('fps').innerHTML = 'FPS = ' + this.curFps;
+            this.curFps = 0;
+            this.lastCall = Date.now();
+        }
+        this.curFps++;
+    }
 
     timing(name, value) {
         if (value) {
@@ -259,7 +257,7 @@ class ChartCanvas {
     }
 
     inputChanged() {
-        return this.prevP0 !== this.p0 || this.prevP1 !== this.p1 || Object.keys(this.getLinesChanged()).length;
+        return this.prevP0 !== this.p0 || this.prevP1 !== this.p1; // || Object.keys(this.getLinesChanged()).length;
     }
 
     getLinesChanged() {
@@ -282,8 +280,8 @@ class ChartCanvas {
     update() {
 		// Update animation timings
         if (this.inputChanged() || this.updateTimings()) {
-            this.setPlotPoints();
             this.setFromPct();
+            this.setPlotPoints();
             // run animation
             if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
                 this.handleXRangeChanged(this.i0, this.i1);
@@ -304,6 +302,7 @@ class ChartCanvas {
             this.prevI0 = this.i0;
             this.prevI1 = this.i1;
             this.render();
+            this.fps();
         }
         requestAnimFrame(this.update);
     }
