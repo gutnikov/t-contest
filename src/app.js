@@ -1,10 +1,18 @@
+
 // Night mode for a page
 // Use same colors as on demo (themes)
-
 // fix hover
+// fix buttons on old safari
+// normal dialog on hover
+// put date on the middle of the point
+// put hover on separate canvas
+// put hrules on separate canvas?
+// drobniye koordinaty?
 // less lines for phones
 // put left to 0 right to 100% - rulers disapear
 // Blinking numbers
+// rewrite no classes
+// h animations sometimes looks strange
 // Canvas resize breaks ruler
 
 class ChartCanvas {
@@ -364,11 +372,11 @@ class ChartCanvas {
             0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
             this.plotArea.y + this.plotAreaPadding.y * 2);
         if (this.hasRulers) {
-            this.renderYRulers();
-            this.renderXRulers();
+            // this.renderYRulers();
+            // this.renderXRulers();
         }
         this.renderLines();
-        this.renderTooltip(10);
+        // this.renderTooltip(10);
         this.fps();
     }
 
