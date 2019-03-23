@@ -55,6 +55,7 @@ class ChartCanvas {
 
         this.setFromPct(p0, p1);
         this.setFromPct(p0, p1);
+        this.setPlotPoints();
 
         this.prevYRulers = [];
         this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);
@@ -69,6 +70,7 @@ class ChartCanvas {
         this.lastUpdate = Date.now();
         this.setEvents();
         this.update = this.update.bind(this);
+        this.render();
         this.update();
     }
 
@@ -235,8 +237,13 @@ class ChartCanvas {
         const prevUpdate = this.lastUpdate;
         this.lastUpdate = Date.now();
         const delta = this.lastUpdate - prevUpdate;
+        let changed = false;
     	for (let k in this.timings) {
-    		this.timings[k](delta);
+    	    const prev = this.timings[k]();
+    	    const next = this.timings[k](delta);
+    		if (prev !== next) {
+    		    changed = true;
+            }
     	}
     	for (let k in this.animations) {
     	    const anim = this.animations[k];
@@ -248,6 +255,7 @@ class ChartCanvas {
     	        this.animations[k] = null;
             }
         }
+    	return changed;
     }
 
     inputChanged() {
@@ -273,9 +281,8 @@ class ChartCanvas {
 
     update() {
 		// Update animation timings
-        this.updateTimings();
-        this.setPlotPoints();
-        if (this.inputChanged()) {
+        if (this.inputChanged() || this.updateTimings()) {
+            this.setPlotPoints();
             this.setFromPct();
             // run animation
             if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
@@ -296,8 +303,8 @@ class ChartCanvas {
             this.prevSourceHeight = this.sourceHeight;
             this.prevI0 = this.i0;
             this.prevI1 = this.i1;
+            this.render();
         }
-        this.render();
         requestAnimFrame(this.update);
     }
 
@@ -349,11 +356,12 @@ class ChartCanvas {
             0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
             this.plotArea.y + this.plotAreaPadding.y * 2);
         if (this.hasRulers) {
-            this.renderYRulers();
-            this.renderXRulers();
+            // this.renderYRulers();
+            // this.renderXRulers();
         }
         this.renderLines();
-        this.renderTooltip(10);
+        // this.renderTooltip(10);
+        console.log('render');
     }
 
     renderLines() {
@@ -515,7 +523,7 @@ function chartAt(parent, data) {
     const width = rect.width;
     const height = width * (2/3);
     const mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
-    const rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
+    // const rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
     const ruler = new Ruler({
         width: rect.width * getDpr(),
         height: 100 * getDpr(),
@@ -534,11 +542,11 @@ function chartAt(parent, data) {
     });
     const buttons = new Buttons(data, function(name, value) {
         mainCanvas.setLineEnabled(name, value);
-        rulerCanvas.setLineEnabled(name, value);
+        // rulerCanvas.setLineEnabled(name, value);
     });
     ruler.canvas.style = `width: ${rect.width}px; height: ${100}px`;
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
-    element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
+    // element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(ruler.canvas);
     element.querySelector('.chart-buttons').appendChild(buttons.element);
     // window.addEventListener('resize', function() {

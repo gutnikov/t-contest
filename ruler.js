@@ -125,8 +125,6 @@ class Ruler {
                 this.left = left;
                 this.right = right;
                 this.handleChange(this.left, this.right);
-            } else {
-                console.log(left, right);
             }
         }
     }
