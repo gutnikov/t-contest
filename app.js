@@ -1,210 +1,27 @@
 // TODO:
-// Main area dragging with canvas
+// Vertical ruler showing current position
 
-// Turning line on/of animations (fix anim fn)
-// V rules animations
-// Dates instead of numbers
-// main chart layout: padding on top + vrules on bottom
-// Vertical ruller showing current position
-
-// Canvas resizing
-// Calculate a number of vrules by the sccreen size
+// blinking numbers
+// Buttons click and show bug
+// Range boundaries not always goes to 0
+// Mouse variant exceeds min/max area
+// Canvas resize breaks ruler
 
 // Use same colors as on demo (themes)
-
-// Fix scaling so it always divided by 6 decently
-// Add new buttons
-
 // Night mode for a page
-// Header
-// Buttons
-// Button animations
 
-// Bug: put close to each other
-// Drag left handle, then drag right - causes scale to lag
-
-// Put all charts on a page
-
-window.requestAnimFrame = (function(){
-  return  window.requestAnimationFrame       ||
-          window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame    ||
-          function( callback ){
-            window.setTimeout(callback, 1000 / 60);
-          };
-})();
-
-// mainColor
-// borderColor
-// borderTopBottom
-// borderLeftRight
-class Ruler {
-	constructor(config) {
-		Object.assign(this, config, {
-			leftDown: false,
-			rightDown: false,
-			mainDown: false,
-			counter: 0
-		});
-		this.canvas = createCanvas(
-			this.width,
-			this.height);
-		this.setEvents();
-		this.render = this.render.bind(this);
-		this.render();
-	}
-
-	render() {
-		var ctx = this.canvas.getContext("2d");
-		ctx.clearRect(0, 0, this.width, this.height);
-
-		ctx.fillStyle = this.theme.mainColor;
-		ctx.fillRect(0, 0, this.width * this.left, this.height);
-		ctx.fillRect(
-			this.width * this.right, 0, 
-			this.width * (1 - this.right), this.height);
-
-
-// 		ctx.strokeStyle = this.theme.borderColor;
-// 		ctx.lineWidth = 6; //this.theme.border[0];
-
-// 		ctx.moveTo(this.width * this.left + this.theme.border[0]/2, 0);
-// 		ctx.lineTo(this.width * this.right - this.theme.border[0]/2, 0);
-// 		ctx.stroke();
-
-// 		ctx.moveTo(this.width * this.left + this.theme.border[0]/2, this.height);
-// 		ctx.lineTo(this.width * this.right - this.theme.border[0]/2, this.height)
-// 		ctx.stroke();
-
-// 		ctx.lineWidth = this.theme.border[1];
-// 		ctx.moveTo(this.width * this.right - this.theme.border[1]/2, 0);
-// 		ctx.lineTo(this.width * this.right - this.theme.border[1]/2, this.height);
-// 		ctx.moveTo(this.width * this.left + this.theme.border[1]/2, 0);
-// 		ctx.lineTo(this.width * this.left + this.theme.border[1]/2, this.height);
-		requestAnimFrame(this.render);
-	}
-
-	setEvents() {
-		const self = this;
-		this.canvas.addEventListener("mousedown", function (e) {
-			const cords = self.cords(e);
-			self.downState = {
-				cords,
-				left: self.left,
-				right: self.right
-			};
-			console.log(cords);
-			if (inRect(cords.x, cords.y, {
-				left: self.width * self.left - self.touchAreaWidth,
-				right: self.width * self.left,
-				top: 0,
-				bottom: self.height
-			})) {
-				self.leftDown = true;
-			}
-			if (inRect(cords.x, cords.y, {
-				left: self.width * self.right,
-				right: self.width * self.right + self.touchAreaWidth,
-				top: 0,
-				bottom: self.height
-			})) {
-				self.rightDown = true;
-			}
-			if (inRect(cords.x, cords.y, {
-				left: self.width * self.left,
-				right: self.width * self.right,
-				top: 0,
-				bottom: self.height
-			})) {
-				self.mainDown = true;
-			}
-		}, false);
-
-		this.canvas.addEventListener("mouseup", function (e) {
-			self.leftDown = self.rightDown = self.mainDown = false;
-		}, false);
-
-		this.canvas.addEventListener("mousemove", function (e) {
-			const cords = self.cords(e);
-			if (self.leftDown) {
-				const offset = sub(cords, self.downState.cords).x;
-				const left = (self.width * self.downState.left + offset)/self.width;
-				self.left = Math.min(self.right, left);
-			}
-			if (self.rightDown) {
-				const offset = sub(cords, self.downState.cords).x;
-				const right = (self.width * self.downState.right + offset)/self.width;
-				self.right = Math.max(self.left, right);
-			}
-			if (self.mainDown) {
-				const offset = sub(cords, self.downState.cords).x;
-				let left = (self.width * self.downState.left + offset)/self.width;
-				let right = (self.width * self.downState.right + offset)/self.width;
-				self.left = left;
-				self.right = right;
-			}
-		}, false);
-	}
-
-	cords(e) {
-		var rect = this.canvas.getBoundingClientRect();
-		return v2((e.clientX - rect.left) * dpr,
-			(e.clientY - rect.top) * dpr);
-	}
-}
-
-const dpr = window.devicePixelRatio || 1;
-
-const r = new Ruler({
-	width: 400 * dpr,
-	height: 50 * dpr,
-	theme: {
-		mainColor: 'rgba(0,0,0,0.3)',
-		borderColor: 'rgba(0,0,0, 0.5)',
-		border: [1 * dpr, 6 * dpr]
-	},
-	left: 0.1,
-	right: 0.45,
-	touchAreaWidth: 30
-});
-r.canvas.style = 'width: 400px; height: 50px';
-document.body.appendChild(r.canvas);
-
-
-
-function createCanvas(w, h) {
-	const canvas = document.createElement('canvas');
-	canvas.width = w;
-	canvas.height = h;
-// 	canvas.style = `width: ${w}px; height: ${h}px`;
-// 	canvas.style = style;
-	return canvas;
-}
-
-
-class Chart {
-    constructor(width, height, data, hasRulers) {
-        this.dpr = window.devicePixelRatio || 1;
-        this.dprFactor = v2(this.dpr, this.dpr);
-        this.canvas = this.createCanvas(width, height, this.dpr);
-        this.context2d = this.canvas.getContext('2d');
+class ChartCanvas {
+    constructor(width, height, data, hasRulers, p0, p1) {
+        //
         this.hasRulers = hasRulers;
-        this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names).reduce(function(all, key){
-            all[key] = true;
-            return all;
-        }, {});
-
-        this.plotArea = v2(this.canvas.width, this.canvas.height);
-
         this.colors = data.colors;
+        this.rgbaColors = {};
+        for (let c in data.colors) {
+            this.rgbaColors[c] = hexToRgbA(data.colors[c]);
+        }
+
         this.names = data.names;
         this.lines = {};
-
-        // Animate functions
-        this.animateCount = 0;
-        this.yAnimation = null;
-        this.t = 0;
-
         data.columns.forEach(function(line) {
             const name = line[0];
             const values = line.slice(1);
@@ -212,53 +29,101 @@ class Chart {
                 this.lines[name] = values;
             }
             else if (data.types[name] === 'x') {
-                this.x0 = values[0];
-                this.x = values.map(v => v - this.x0);
+                this.xOffset = values[0];
+                this.xDates = values.map(v => formatDate(v));
+                this.x = values.map(v => v - this.xOffset);
                 this.xFirst = 0;
                 this.xLast = this.x[this.x.length - 1];
                 this.xSize = this.xLast - this.xFirst;
             }
         }, this);
-        
-        this.setXRange(this.x[0], this.x[this.x.length - 1]);
 
-        this.vRules = {
-            in: [],
-            out: [],
-            done: this.getVSteps(0, this.x.length - 1)
-        }
+        this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names)
+            .reduce(function(all, key){
+            all[key] = true;
+            return all;
+        }, {});
 
+        // Canvas
+        this.canvas = createCanvas(width, height);
+        this.context2d = this.canvas.getContext('2d');
+        this.plotAreaPadding = this.hasRulers ? v2(0, 20 * getDpr()) : v2(0, 0);
+        this.plotArea = v2(
+            this.canvas.width - this.plotAreaPadding.x * 2,
+            this.canvas.height - this.plotAreaPadding.y * 2);
+
+        this.yRangeSteps = 6;
+        this.xRangeSteps = 6;
+        this.stepsScale = stepsScale(0, this.x.length - 1, this.xRangeSteps);
+
+        this.p0 = p0;
+        this.p1 = p1;
+
+        this.setFromPct(p0, p1);
+        this.setFromPct(p0, p1);
+
+        this.prevYRulers = [];
+        this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);
+
+        this.xRulers = rangeSteps(this.i0, this.i1, 1, this.xRangeSteps);
+        this.xRulersIn = [];
+        this.xRulersOut = [];
+
+        this.timings = {};
+        this.animations = [];
+
+		this.lastUpdate = Date.now();
         this.update = this.update.bind(this);
-        // sourceY, anim: in | out | null
-        this.rulers = {
-            in: [],
-            out: [],
-            done: []
-        };
-
         this.update();
     }
 
-    createCanvas(w, h, dpr) {
-        const canvas = document.createElement('canvas');
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-        canvas.style = `width: ${w}px; height: ${h}px`;
-        return canvas;
+    setSize(w, h) {
+        setCanvasSize(this.canvas, w, h);
+        this.plotArea = v2(
+            this.canvas.width - this.plotAreaPadding.x * 2,
+            this.canvas.height - this.plotAreaPadding.y * 2);
+        this.factor = map(this.sourceArea, this.plotArea);
     }
 
-    setPctRange(p0, p1) {
-        const x0 = this.xFirst + this.xSize * (p0/100);
-        const x1 = this.xFirst + this.xSize * (p1/100);
-        this.setXRange(x0, x1);
+    setRange(p0, p1) {
+        this.p0 = p0;
+        this.p1 = p1;
     }
 
-    setXRange(x0, x1) {
-        // X range
+    setLineEnabled(name, isEnabled) {
+        this.prevLinesEnabled = this.linesEnabled;
+        this.linesEnabled = Object.assign({}, this.linesEnabled, {
+            [name]: isEnabled
+        });
+    }
+
+    setFromPct() {
+        this.prevP0 = this.p0;
+        this.prevP1 = this.p1;
         this.prevX0 = this.x0;
         this.prevX1 = this.x1;
-        this.x0 = x0;
-        this.x1 = x1;
+        this.prevI0 = this.i0;
+        this.prevI1 = this.i1;
+        this.prevSourceHeight = this.sourceHeight;
+
+        const _0 = this.getXI(this.p0);
+        this.x0 = _0[0];
+        this.i0 = _0[1];
+
+        const _1 = this.getXI(this.p1);
+        this.x1 = _1[0];
+        this.i1 = _1[1];
+
+        this.sourceHeight = this.getMaxHeight();
+        this.sourceOffset = v2(this.x0, 0);
+        this.sourceArea = v2(this.x1 - this.x0, this.sourceArea ? this.sourceArea.y : this.sourceHeight);
+        this.factor = map(this.sourceArea, this.plotArea);
+    }
+
+    getXI(p) {
+        const x = this.xFirst + this.xSize * (p);
+        const i = this.x.findIndex(v => v >= x);
+        return [x, i];
     }
 
 //     fps() {
@@ -276,128 +141,158 @@ class Chart {
 //         this.rps++;
 //     }
 
-    linesChanged() {
-        const before = Object.entries(this.prevLinesEnabled).map(entry => entry[1]).join(',');
-        const after = Object.entries(this.linesEnabled).map(entry => entry[1]).join(',');
-        return before !== after;
+    timing(name, value) {
+        if (value) {
+            this.timings[name] = value;
+        }
+        return this.timings[name];
     }
 
-    getVSteps(i0, i1, inv) {
-        return inv ? steps(i1, i0, -1) : steps(i0, i1);
+    animation(name, fn) {
+        this.animations[name] = fn;
     }
 
-    updateVRules(i0, i1) {
-        const steps = this.getVSteps(i0, i1, this.prevX0 !== this.x0);
-//         console.log(this.vRules.done.join(','));
-//         console.log(steps.join(','));
-        this.vRules.done = steps;
+    updateTimings() {
+        const prevUpdate = this.lastUpdate;
+        this.lastUpdate = Date.now();
+        const delta = this.lastUpdate - prevUpdate;
+    	for (let k in this.timings) {
+    		this.timings[k](delta);
+    	}
+    	for (let k in this.animations) {
+    	    const anim = this.animations[k];
+    	    if (!anim) {
+    	        continue;
+            }
+    	    const v = anim.call(this);
+    	    if (v === true) {
+    	        this.animations[k] = null;
+            }
+        }
+    }
+
+    inputChanged() {
+        return this.prevP0 !== this.p0 || this.prevP1 !== this.p1 || Object.keys(this.getLinesChanged()).length;
+    }
+
+    getLinesChanged() {
+        const result = {};
+        for (let k in this.linesEnabled) {
+            if (this.linesEnabled[k] !== this.prevLinesEnabled[k]) {
+                result[k] = this.linesEnabled[k] ? 'on' : 'off';
+            }
+        }
+        return result;
+    }
+
+    getMaxHeight() {
+        const arrays = Object.keys(this.lines)
+            .filter(function(key) {return this.linesEnabled[key]}, this)
+            .map(function(key){ return this.lines[key]}, this);
+        return splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), 6)[6];
     }
 
     update() {
-        if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1 || this.linesChanged()) {
-            const x0 = this.x0;
-            const x1 = this.x1;
-            // Determine index range
-            const i0 = this.x.findIndex(v => v >= x0) || 0;
-            const i1 = this.x.findIndex(v => v >= x1) || this.x.length - 1;
-
-            this.i0 = i0 === -1 ? 0 : i0;
-            this.i1 = i1 === -1 ? this.x.length - 1 : i1;
-
-            if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
-                this.updateVRules(this.i0, this.i1);
-            }
-
-
-            let yMax = 0;
-            Object.entries(this.lines)
-                .filter(function([name]) { return this.linesEnabled[name] }, this)
-                .forEach(function([name, values]) {
-                const lineMax = values.slice(this.i0, this.i1 + 1).sort(desc)[0];
-                yMax = yMax > lineMax ? yMax : lineMax;
-            }, this);
-            this.prevYMax = this.yMax || 0;
-            this.yMax = yMax;
-
-            this.sourceOffset = v2(this.x0, 0);
-            this.sourceArea = v2(this.x1 - this.x0, this.sourceArea ? this.sourceArea.y : this.yMax);
-            this.factor = map(this.sourceArea, this.plotArea);
-
+		// Update animation timings
+        this.updateTimings();
+        if (this.inputChanged()) {
+            this.setFromPct();
             // run animation
-            if (this.yMax !== this.prevYMax) {
-                this.yAnimation = this.animateMaxY(this.yMax);
-                this.updateRulers(this.yMax);
+            if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
+                this.handleXRangeChanged(this.i0, this.i1);
             }
+            if (this.sourceHeight !== this.prevSourceHeight) {
+                this.handleYRangeChanged();
+            }
+            const linesChanged = this.getLinesChanged();
+            if (Object.keys(linesChanged).length) {
+                this.handleLinesChanged(linesChanged);
+            }
+            this.prevP0 = this.p0;
+            this.prevP1 = this.p1;
             this.prevX0 = this.x0;
             this.prevX1 = this.x1;
             this.prevLinesEnabled = this.linesEnabled;
+            this.prevSourceHeight = this.sourceHeight;
+            this.prevI0 = this.i0;
+            this.prevI1 = this.i1;
         }
-
-        if (this.yAnimation) {
-            let newY = this.sourceArea.y;
-            
-            const animResult = this.yAnimation(Date.now());
-            if (!animResult) {
-                this.t = 0;
-                this.yAnimation = null;
-                this.rulers.done = this.rulers.in;
-                this.rulers.out = [];
-                this.rulers.in = [];
-            } else {
-                this.t = animResult[0];
-                newY = animResult[1].y;
-            }
-            this.sourceArea.y = newY;
-            this.factor = map(this.sourceArea, this.plotArea);
-        }
-
-        if (this.vRulesAnimation) {
-            const vResult = this.vRulesAnimation(Date.now());
-            if (!vResult) {
-                this.vt = 0;
-                this.vRulesAnimation = null;
-                this.vRules.done = this.vRules.in;
-                this.vRules.out = [];
-                this.vRules.in = [];
-            } else {
-                this.vt = vResult[0];
-            }
-        }
-
         this.render();
         requestAnimFrame(this.update);
     }
 
-    animateMaxY(y) {
-        return animate(
-            this.sourceArea,
-            v2(this.sourceArea.x, y),
-            0.60,
-            easeInOutQuart,
-            Date.now()
-        );
+    handleXRangeChanged() {
+        const wt = this.timing('changeWidth');
+        if (!wt || wt() === 1) {
+            this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
+        }
+        let newSteps;
+        for (let i = 0; i < this.stepsScale.length; i++) {
+            let steps = this.stepsScale[i].filter(v => v >= this.i0 && v <= this.i1);
+            if (steps.length > this.xRangeSteps) {
+                break;
+            }
+            newSteps = steps;
+        }
+        this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(v => newSteps.indexOf(v) === -1));
+        this.xRulersIn = newSteps.filter(v => this.xRulers.indexOf(v) === -1);
+        this.xRulers = this.xRulers.filter(v => newSteps.indexOf(v) !== -1);
+    }
+
+    handleWidthTimingDone() {
+        this.xRulers = this.xRulers.concat(this.xRulersIn);
+        this.xRulersOut = [];
+        this.xRulersIn = [];
+    }
+
+    handleYRangeChanged() {
+        const t = this.timing('changeHeight', timing(600));
+        const current = this.sourceArea.y;
+        this.prevYRulers = this.yRulers;
+        this.yRulers = splitRange(0, this.sourceHeight, 6);
+        this.animation('lines', function() {
+            const tv = t();
+            this.sourceArea.y = animated(current, this.sourceHeight, easeInOutQuart(tv));
+            this.factor = map(this.sourceArea, this.plotArea);
+            return tv === 1;
+        });
+    }
+
+    handleLinesChanged(changes) {
+        Object.keys(changes).forEach(function(name){
+            this.timing('line:' + name, timing(600));
+        }, this);
     }
 
     render() {
-        this.context2d.clearRect(0, 0, this.plotArea.x, this.plotArea.y);
+        this.context2d.clearRect(
+            0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
+            this.plotArea.y + this.plotAreaPadding.y * 2);
         if (this.hasRulers) {
-            this.renderRulers();
-            this.renderVRulers();
+            this.renderYRulers();
+            this.renderXRulers();
         }
         this.renderLines();
+        this.renderTooltip(10);
     }
 
     renderLines() {
         Object.keys(this.lines)
-            .filter(function(name) { return this.linesEnabled[name] }, this)
-            .forEach(this.renderLine, this);
+            .forEach(function(name) {
+                this.renderLine(name);
+            }, this);
     }
 
     renderLine(name) {
+        const t = this.timing('line:' + name);
+        let alpha =  t ? t() : 1;
         this.context2d.beginPath();
-        this.context2d.strokeStyle = this.colors[name];
-        this.context2d.lineWidth = 2.5 * this.dpr;
-        
+        this.context2d.strokeStyle = withAlpha(
+            this.rgbaColors[name],
+            easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
+        );
+        this.context2d.lineWidth = 2.5 * getDpr();
+
         // cords
         const xs = this.x.slice(this.i0, this.i1 + 1);
         const ys = this.lines[name].slice(this.i0, this.i1 +1);
@@ -407,8 +302,8 @@ class Chart {
             xs.unshift(this.x0);
             ys.unshift(
                 linePoint(
-                    v2(this.x[this.i0-1], this.lines[name][this.i0-1]), 
-                    v2(this.x[this.i0], this.lines[name][this.i0]), 
+                    v2(this.x[this.i0-1], this.lines[name][this.i0-1]),
+                    v2(this.x[this.i0], this.lines[name][this.i0]),
                     this.x0)
                 .y);
         }
@@ -425,14 +320,14 @@ class Chart {
         }
 
         for (let i = 0; i < xs.length; i++ ) {
-            const plotPoint = invertY(
+            const plotPoint = add(invertY(
                 scale(
                     sub(
-                        v2(xs[i], ys[i]), 
+                        v2(xs[i], ys[i]),
                         this.sourceOffset
                     ),
                     this.factor
-                ), this.plotArea);
+                ), this.plotArea), this.plotAreaPadding);
             if (i === 0) {
                 this.context2d.moveTo(plotPoint.x,plotPoint.y);
             } else {
@@ -442,49 +337,39 @@ class Chart {
         this.context2d.stroke();
     }
 
-    updateRulers(yMax) {
-        this.rulers.out = this.rulers.done;
-        this.rulers.done = [];
-        this.rulers.in = [];
-        
-        const step = yMax / 6;
-        for (let i = 0; i < 6; i++ ) {
-            this.rulers.in[i] = {
-                y: step * i
-            };
-        }
+    renderXRulers() {
+        const t = this.timing('changeWidth');
+        const tv = t ? t() : 1;
+        this.xRulersIn.forEach(r => this.renderXRuler(r, easeInQuart(tv)));
+        this.xRulersOut.forEach(r => this.renderXRuler(r, 1 - easeInQuart(tv)));
+        this.xRulers.forEach(r => this.renderXRuler(r, 1));
     }
 
-    renderVRulers() {
-        this.vRules.in.forEach(r => this.renderVRuler(r, linear(this.vt)));
-        this.vRules.out.forEach(r => this.renderVRuler(r, linear(1 - this.vt)));
-        this.vRules.done.forEach(r => this.renderVRuler(r, 1));
-    }
-
-    renderVRuler(i, alpha) {
+    renderXRuler(i, alpha) {
         const x = this.x[i];
+        const label = this.xDates[i];
         const v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
-
         this.context2d.font = "28px Arial";
         this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-        this.context2d.fillText(String(Math.ceil(i)), v.x, this.plotArea.y - 20);
-
+        this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y);
     }
 
-    renderRulers() {
-        this.rulers.in.forEach(r => this.renderRuler(r.y, easeInQuad(this.t)));
-        this.rulers.out.forEach(r => this.renderRuler(r.y, easeInQuad(1 - this.t)));
-        this.rulers.done.forEach(r => this.renderRuler(r.y, 1));
+
+    renderYRulers() {
+        const t = this.timing('changeHeight');
+        const tv = t ? t() : 1;
+        this.yRulers.forEach(r => this.renderYRuler(r, easeInQuad(tv)));
+        this.prevYRulers.forEach(r => this.renderYRuler(r, easeInQuad(1 - tv)));
     }
 
-    renderRuler(y, alpha) {
+    renderYRuler(y, alpha) {
         this.context2d.beginPath();
         this.context2d.strokeStyle = `rgba(224, 224, 224, ${alpha})`;
-        this.context2d.lineWidth = 1 * this.dpr;
+        this.context2d.lineWidth = 1 * getDpr();
         const rv = invertY(
             scale(v2(0, y), this.factor
             ), this.plotArea)
-        
+
         this.context2d.moveTo(20, rv.y) ;
         this.context2d.lineTo(this.plotArea.x, rv.y);
         this.context2d.stroke();
@@ -493,263 +378,195 @@ class Chart {
         this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
     }
 
-    setLineEnabled(name, isEnabled) {
-        this.prevLinesEnabled = this.linesEnabled;
-        this.linesEnabled = Object.assign({}, this.linesEnabled, {
-            [name]: isEnabled
-        });
-    }
-}
+    renderTooltip(i) {
+        const ctx = this.context2d;
+        const x = this.x[i];
+        const linePoints = Object.keys(this.lines).map(function(name){
+            const y = this.lines[name][i];
+            return [name, add(invertY(scale(
+                sub(
+                    v2(x, y),
+                    this.sourceOffset
+                ),
+                this.factor
+            ), this.plotArea), this.plotAreaPadding), this.lines[name][i]];
+        }, this);
 
-const main = new Chart(
-    600,
-    400,
-    window.data[0],
-    true
-);
-const ruler = new Chart(
-    600,
-    50,
-    window.data[0]
-);
-// Slider component
-class RangeSlider {
-    constructor(onRangeChanged) {
-        this.onRangeChanged = onRangeChanged || function(){};
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div class="range-slider" id="range-slider">
-                <div class="left-area">
-                    <div class="handle"></div>
-                </div>
-                <div class="main-area"></div>
-                <div class="right-area">
-                    <div class="handle"></div>
-                </div>
-            </div>
-        `;
-        this.element = wrapper.children[0];
-    }
+        // Render line
+        const plotPoint = linePoints[0][1];
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(224, 224, 224)`;
+        ctx.lineWidth = 1 * getDpr();
+        ctx.moveTo(plotPoint.x, 0) ;
+        ctx.lineTo(plotPoint.x, this.plotArea.y);
+        ctx.stroke();
+        ctx.lineWidth = 2 * getDpr();
+        // Render circles
+        linePoints.forEach(function(np) {
+            const name = np[0];
+            const p = np[1];
+            const t = this.timing('line:' + name);
+            let alpha =  t ? t() : 1;
+            ctx.fillStyle = 'rgba(255,255,255)';
+            ctx.strokeStyle = withAlpha(
+                this.rgbaColors[name],
+                easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
+            );
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4 * getDpr(), 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }, this);
 
-    mountTo(parent) {
-        parent.appendChild(this.element);
-        this.setEvents();
-    }
+        // Render tooltip
+        const rectWidth = 200 * getDpr();
+        const rectHeight = 50 * getDpr() * (Math.ceil(linePoints.length/2) + 1);
+        const rectX = plotPoint.x - rectWidth * (1/3);
+        const rectY = 10;
+        const cornerRadius = 20;
 
-    setEvents() {
-        const rect = this.element.getBoundingClientRect();
-        const left = this.element.querySelectorAll('.left-area')[0];
-        const leftHanle = this.element.querySelectorAll('.left-area .handle')[0];
-        const right = this.element.querySelectorAll('.right-area')[0];
-        const rightHandle = this.element.querySelectorAll('.right-area .handle')[0]
-        const main = this.element.querySelectorAll('.main-area')[0];
+        ctx.strokeStyle = 'rgba(205,205,205)';
+        // ctx.lineJoin = "round";
+        // ctx.lineWidth = cornerRadius;
+        ctx.lineWidth = 1 * getDpr();
+        ctx.strokeRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
+        ctx.fillStyle = 'rgba(255,255,255)';
+        ctx.fillRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
 
-        const self = this;
-        setLeftHandle(0.0);
-        setRightHandle(0.9);
-
-        // Dragging main area
-        document.addEventListener('mousedown', function(event) {
-            const leftRect = leftHanle.getBoundingClientRect();
-            const rightRect = rightHandle.getBoundingClientRect();
-            const mainRect = main.getBoundingClientRect();
-
-            if (inRect(event.clientX, event.clientY, mainRect)) {
-                self.mainDown = true;
-                self.mainClickX = mainRect.left - event.clientX;
-            }
-            if (inRect(event.clientX, event.clientY, leftRect)) {
-                self.leftDown = true;
-                self.leftOffset = leftRect.width - (event.clientX - leftRect.left);
-            }
-            if (inRect(event.clientX, event.clientY, rightRect)) {
-                self.rightDown = true;
-                self.rightOffset = rightRect.width - (rightRect.right - event.clientX);
-            }
-        });
-
-        document.addEventListener('mouseup', function() {
-            self.mainDown = false;
-            self.leftDown = false;
-            self.rightDown = false;
-        });
-
-        document.addEventListener('mousemove', function(event) {
-            if (!self.leftDown && !self.rightDown && !self.mainDown) {
-                return;
-            }
-            if (self.mainDown) {
-            }
-            if (self.leftDown) {
-                setLeftHandle((event.clientX - rect.left) / rect.width);
-            }
-            if (self.rightDown) {
-                setRightHandle((rect.right - event.clientX) / rect.width);
-            }
-        });
-
-        function setLeftHandle(pct) {
-            left.style.flexBasis = `${(pct * 100).toFixed(1)}%`;
-            self.handleRangeChanged(left.style.flexBasis, right.style.flexBasis);
-        }
-
-        function setRightHandle(pct) {
-            right.style.flexBasis = `${(pct * 100).toFixed(1)}%`;
-            self.handleRangeChanged(left.style.flexBasis, right.style.flexBasis);
-        }
-
-        function setMainArea(event) {
-
-        }
-    }
-
-    handleRangeChanged(left, right) {
-        this.onRangeChanged(
-            Number(left.slice(0, -1)), 
-            100 - Number(right.slice(0, -1))
-        );
-    }
-}
-
-class Buttons {
-    constructor(names, onChange) {
-        this.names = names;
-        this.onChange = onChange || function(){};
-        this.element = document.createElement('div');
-        const buttons = names.map(item => `<label><input type="checkbox" name="${item.id}" checked="true">${item.name}</label>`);
-        this.element.innerHTML = buttons.join('');
-    }
-
-    mountTo(parent) {
-        parent.appendChild(this.element);
-        this.names.forEach(function(item) {
-            this.element.querySelector(`input[name=${item.id}]`).addEventListener('change', this.handleChange.bind(this));
+        // Header
+        this.context2d.font = "28px Arial";
+        this.context2d.fillStyle = `rgba(0, 0, 0, 1)`;
+        this.context2d.fillText(this.xDates[i], rectX + rectWidth/2 - 50, rectY + 50);
+    
+        linePoints.forEach(function(npv, i) {
+            const name = npv[0];
+            const label = this.names[name];
+            const v = npv[2];
+            ctx.fillStyle = withAlpha(
+                this.rgbaColors[name], 1
+            );
+            ctx.font = "36px Arial";
+            const itemY = rectY + 100 + Math.floor(i/2) * 100;
+            const itemX = rectX + 50 + (i % 2) * 150;
+            ctx.fillText(String(v), itemX, itemY);
+            ctx.font = "28px Arial";
+            ctx.fillText(label, itemX, itemY + 34);
         }, this);
     }
-
-    handleChange(event) {
-        this.onChange(event.target.name, event.target.checked);
-    }
 }
 
-
-const container = document.getElementById('chart');
-container.appendChild(main.canvas);
-container.appendChild(ruler.canvas);
-const slider = new RangeSlider(function(min, max) {
-//     console.log(min, max);
-    main.setPctRange(min, max);
-});
-slider.mountTo(container);
-const buttons = new Buttons(
-    Object.entries(window.data[0].names).map(function(e){ return {id: e[0], name: e[1]}}),
-    function(name, value) {
-        main.setLineEnabled(name, value);
-        ruler.setLineEnabled(name, value);
-    }
-    );
-buttons.mountTo(container);
-
-// Animation and easing functions
-function animate(v2from, v2to, durationSec, easingFn, timeStarted) {
-    return function(now) {
-        const t = (now - timeStarted) / (durationSec * 1000);
-        // Finished?
-        if (t > 1) {
-            return null;
-        } else {
-            const et = easingFn(t);
-            const delta = sub(v2to, v2from);
-            return [t, add(v2from, v2(delta.x * et, delta.y * et))];
+function chartAt(parent, data) {
+    const p0 = 0.3;
+    const p1 = 0.6;
+    const element = document.createElement('div');
+    element.classList.add('chart');
+    element.innerHTML = `
+            <div class='chart-header'>Followers</div>
+            <div class='chart-main-canvas'></div>
+            <div class='chart-ruler'></div>
+            <div class='chart-buttons'></div>
+        `;
+    let rect = parent.getBoundingClientRect();
+    const width = rect.width;
+    const height = width * (2/3);
+    const mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
+    const rulerCanvas = new ChartCanvas(width, 50, data, false, p0, p1);
+    const ruler = new Ruler({
+        width: rect.width * getDpr(),
+        height: 50 * getDpr(),
+        theme: {
+            mainColor: 'rgba(0,0,0,0.3)',
+            borderColor: 'rgba(0,0,0, 0.5)',
+            border: [1 * getDpr(), 6 * getDpr()]
+        },
+        left: p0,
+        right: p1,
+        minMainArea: 0.05,
+        touchAreaWidth: 30,
+        onChange: function(min, max) {
+            mainCanvas.setRange(min , max );
         }
-    }
+    });
+    const buttons = new Buttons(
+        Object.entries(window.data[0].names).map(function(e){ return {id: e[0], name: e[1]}}),
+    function(name, value) {
+        mainCanvas.setLineEnabled(name, value);
+        rulerCanvas.setLineEnabled(name, value);
+    });
+    ruler.canvas.style = `width: ${rect.width}px; height: ${50}px`;
+    element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
+    element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
+    element.querySelector('.chart-ruler').appendChild(ruler.canvas);
+    element.querySelector('.chart-buttons').appendChild(buttons.element);
+    window.addEventListener('resize', function() {
+        const newRect = parent.getBoundingClientRect();
+        if (newRect.width !== rect.width) {
+            mainCanvas.setSize(newRect.width, newRect.width * 2/3);
+            rulerCanvas.setSize( newRect.width, 50);
+            ruler.canvas.width = newRect.width;
+            ruler.canvas.style = `width: ${rect.width}px; height: ${50}px`;
+        }
+    });
+    parent.appendChild(element);
 }
 
-// no easing, no acceleration
-function linear(t) { return t }
-// accelerating from zero velocity
-function easeInQuad(t) { return t*t }
-// decelerating to zero velocity
-function easeOutQuad(t) { return t*(2-t) }
-// acceleration until halfway, then deceleration
-function easeInOutQuad(t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t }
-// accelerating from zero velocity 
-function easeInCubic(t) { return t*t*t }
-// decelerating to zero velocity 
-function easeOutCubic(t) { return (--t)*t*t+1 }
-// acceleration until halfway, then deceleration 
-function easeInOutCubic(t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 }
-// accelerating from zero velocity 
-function easeInQuart(t) { return t*t*t*t }
-// decelerating to zero velocity 
-function easeOutQuart(t) { return 1-(--t)*t*t*t }
-// acceleration until halfway, then deceleration
-function easeInOutQuart(t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t }
-// accelerating from zero velocity
-function easeInQuint(t) { return t*t*t*t*t }
-// decelerating to zero velocity
-function easeOutQuint(t) { return 1+(--t)*t*t*t*t }
-// acceleration until halfway, then deceleration 
-function easeInOutQuint(t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
 
-// Vector operations
-function v2(x,y) {
-    return {
-        x,
-        y
-    };
-}
+const container = document.getElementById('container');
 
-function add(a, b) {
-    return v2(a.x + b.x, a.y + b.y);
-}
+window.data.forEach(function(data) {
+    chartAt(container, data);
+});
 
-function sub(a,b) {
-    return v2(a.x - b.x, a.y - b.y);
-}
+// // Bootstrap
+//
+// const whRatio = 2/3;
+// const containerRect = container.getBoundingClientRect();
+//
+// const main = new Chart(
+//     containerRect.width,
+//     containerRect.width * whRatio,
+//     window.data[0],
+//     true,
+//     0.3,
+//     0.6
+// );
+// const ruler = new Chart(
+//     containerRect.width,
+//     50,
+//     window.data[0],
+//     false,
+//     0.3,
+//     0.6
+// );
+//
+// const chart = document.getElementById('chart');
+// chart.appendChild(main.canvas);
+// chart.appendChild(ruler.canvas);
+// const slider = new Ruler({
+// 	width: containerRect.width * getDpr(),
+// 	height: 50 * getDpr(),
+// 	theme: {
+// 		mainColor: 'rgba(0,0,0,0.3)',
+// 		borderColor: 'rgba(0,0,0, 0.5)',
+// 		border: [1 * getDpr(), 6 * getDpr()]
+// 	},
+// 	left: 0.3,
+// 	right: 0.6,
+//     minMainArea: 0.05,
+// 	touchAreaWidth: 30,
+// 	onChange: function(min, max) {
+//     	main.setRange(min , max );
+// 	}
+// });
+// container.appendChild(slider.canvas);
+//
+// const buttons = new Buttons(
+//     Object.entries(window.data[0].names).map(function(e){ return {id: e[0], name: e[1]}}),
+//     function(name, value) {
+//         main.setLineEnabled(name, value);
+//         ruler.setLineEnabled(name, value);
+//     }
+//     );
+// buttons.mountTo(container);
 
-function map(from, to) {
-    return v2(to.x/from.x, to.y/from.y);
-}
 
-function scale(v, factor) {
-    return v2(v.x * factor.x, v.y * factor.y);
-}
-
-function invertY(v, area) {
-    return v2(v.x, area.y - v.y);
-}
-
-function desc(a, b) {
-    if (a === b) {
-        return 0;
-    }
-    return a < b ? 1 : -1;
-}
-
-function inRect(x, y, rect) {
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-}
-
-// Line point
-function linePoint(p1, p2, x) {
-    const y = ((p1.x * p2.y - p2.x * p1.y) + (p1.y - p2.y)*x)/(-(p2.x - p1.x));
-    return v2(x,y);
-}
-
-function range(first, step, count) {
-    let result = [];
-    for (let i = 0; i < count; i++) {
-        result.push(first + i * step);
-    }
-    return result;
-}
-
-function steps(first, last, step = 1, size = 8) {
-    let count = Math.ceil((last - first)/step);
-    if ( count < size ) {
-        return range(first, step, count);
-    } else {
-        return steps(first, last, step * 2, size);
-    }
-}

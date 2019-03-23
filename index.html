@@ -12,52 +12,113 @@
             margin: 0px;
         }
 
-        #chart {
-            padding: 40px;
+        #container {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .range-slider {
-            border: 1px solid grey;
-            width: 600px;
+        .chart {
+            padding-bottom: 100px;
+        }
+
+        .chart-ruler {
+            position: relative;
             height: 50px;
-            display: flex;
+            padding-bottom: 10px;
+        }
+
+        .chart-ruler canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .chart-header {
+            font-family: Arial;
+            font-weight: bold;
+            font-size: 23px;
+            padding: 10px 20px 25px;
+        }
+
+        .checkbox {
+            background: #fff;
+            display: inline-flex;
+            align-items: center;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 6px 10px;
+            font: normal 14px/1.4 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        }
+
+        .checkbox *, .checkbox *:before, .checkbox *:after {
             box-sizing: border-box;
         }
 
-        .range-slider .left-area {
-            flex-basis: 10%;
-        }
-
-        .range-slider .right-area {
-            flex-basis: 10%;
-        }
-
-        .range-slider .main-area {
-            flex: 1;
-            background-color: white;
-        }
-
-        .handle {
-            width: 10px;
-            cursor: pointer;
+        .checkbox > input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
             height: 100%;
-            background-color: grey;
+            display: none;
+            visibility: hidden;
+            opacity: 0;
         }
 
-        .left-area .handle {
-            float: right;
+        .checkbox label {
+            display: inline-flex;
+            user-select: none;
+            cursor: pointer;
+            position: relative;
         }
 
-        .right-area .handle {
-            float: left;
+        .checkbox label:before {
+            content: '';
+            display: inline-flex;
+            margin-right: 6px;
+            border-radius: 100%;
+            border: 2px solid limegreen;
+            width: 20px;
+            height: 20px;
+            transition: all .2s;
         }
 
+        .checkbox label:after {
+            content: '';
+            background-repeat: no-repeat;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Layer_1' x='0px' y='0px' viewBox='0 0 26 26' enable-background='new 0 0 26 26' xml:space='preserve'%3E%3Cpath fill='%23ffffff' d='M22.567,4.73l-1.795-1.219c-0.495-0.334-1.173-0.205-1.507,0.287l-8.787,12.959l-4.039-4.039 c-0.422-0.42-1.11-0.42-1.533,0l-1.533,1.536c-0.424,0.423-0.424,1.11,0,1.534L9.582,22c0.349,0.347,0.895,0.615,1.387,0.615 s0.988-0.31,1.307-0.774L22.856,6.235C23.191,5.743,23.062,5.066,22.567,4.73z'/%3E%3C/svg%3E");
+            display: inline-flex;
+            width: 12px;
+            height: 12px;
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .checkbox input[type="checkbox"] + label::after {
+            content: none;
+        }
+
+        .checkbox input[type="checkbox"]:checked + label::after {
+            content: "";
+        }
+
+        .checkbox input[type="checkbox"]:checked + label::before {
+            border-width: 10px;
+        }
 
     </style>
 </head>
 <body>
-    <div id='chart'/>
+    <div id="container">
+        <div id='chart'/>
+    </div>
     <script src="data.js"></script>
+    <script src="base.js"></script>
+    <script src="buttons.js"></script>
+    <script src="ruler.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
