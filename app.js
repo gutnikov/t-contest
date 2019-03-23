@@ -279,31 +279,30 @@ class ChartCanvas {
 
     update() {
 		// Update animation timings
-        if (this.inputChanged() || this.updateTimings()) {
-            this.setFromPct();
-            this.setPlotPoints();
-            // run animation
-            if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
-                this.handleXRangeChanged(this.i0, this.i1);
-            }
-            if (this.sourceHeight !== this.prevSourceHeight) {
-                this.handleYRangeChanged();
-            }
-            const linesChanged = this.getLinesChanged();
-            if (Object.keys(linesChanged).length) {
-                this.handleLinesChanged(linesChanged);
-            }
-            this.prevP0 = this.p0;
-            this.prevP1 = this.p1;
-            this.prevX0 = this.x0;
-            this.prevX1 = this.x1;
-            this.prevLinesEnabled = this.linesEnabled;
-            this.prevSourceHeight = this.sourceHeight;
-            this.prevI0 = this.i0;
-            this.prevI1 = this.i1;
-            this.render();
-            this.fps();
-        }
+        // if (this.inputChanged() || this.updateTimings()) {
+        //     this.setFromPct();
+        //     this.setPlotPoints();
+        //     // run animation
+        //     if (this.prevX0 !== this.x0 || this.prevX1 !== this.x1) {
+        //         this.handleXRangeChanged(this.i0, this.i1);
+        //     }
+        //     if (this.sourceHeight !== this.prevSourceHeight) {
+        //         this.handleYRangeChanged();
+        //     }
+        //     const linesChanged = this.getLinesChanged();
+        //     if (Object.keys(linesChanged).length) {
+        //         this.handleLinesChanged(linesChanged);
+        //     }
+        //     this.prevP0 = this.p0;
+        //     this.prevP1 = this.p1;
+        //     this.prevX0 = this.x0;
+        //     this.prevX1 = this.x1;
+        //     this.prevLinesEnabled = this.linesEnabled;
+        //     this.prevSourceHeight = this.sourceHeight;
+        //     this.prevI0 = this.i0;
+        //     this.prevI1 = this.i1;
+        // }
+        this.render();
         requestAnimFrame(this.update);
     }
 
@@ -358,9 +357,10 @@ class ChartCanvas {
             // this.renderYRulers();
             // this.renderXRulers();
         }
-        this.renderLines();
+        // this.renderLines();
         // this.renderTooltip(10);
-        console.log('render');
+        // console.log('render');
+        this.fps();
     }
 
     renderLines() {

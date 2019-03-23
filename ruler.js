@@ -46,7 +46,7 @@ class Ruler {
         ctx.fillRect(this.width * this.left, this.height - this.theme.border[0], this.width * (this.right - this.left), this.theme.border[0]);
         ctx.fillRect(this.width * this.left, 0, this.theme.border[1], this.height);
         ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
-        requestAnimFrame(this.render);
+        // requestAnimFrame(this.render);
     }
 
     setEvents() {
