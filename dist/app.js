@@ -86,7 +86,6 @@ var ChartCanvas = function () {
 
         this.lastUpdate = Date.now();
         this.setEvents();
-        this.bodyNoScroll();
         this.update = this.update.bind(this);
         this.render();
         this.update();
