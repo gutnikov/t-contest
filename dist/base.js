@@ -16,7 +16,8 @@ function setCanvasSize(canvas, w, h, dpr) {
     var useDpr = dpr || getDpr();
     canvas.width = w * useDpr;
     canvas.height = h * useDpr;
-    canvas.style = 'width: ' + w + 'px; height: ' + h + 'px';
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
 }
 
 var dpr = window.devicePixelRatio || 1;

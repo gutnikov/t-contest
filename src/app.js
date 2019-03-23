@@ -1,6 +1,7 @@
 // Night mode for a page
 // Use same colors as on demo (themes)
 
+// fix hover
 // less lines for phones
 // put left to 0 right to 100% - rulers disapear
 // Blinking numbers
@@ -541,7 +542,7 @@ function chartAt(parent, data) {
         },
         left: p0,
         right: p1,
-        minMainArea: 0.005,
+        minMainArea: 0.03,
         touchAreaWidth: 30,
         onChange: function(min, max) {
             mainCanvas.setRange(min, max);
@@ -551,7 +552,9 @@ function chartAt(parent, data) {
         mainCanvas.setLineEnabled(name, value);
         rulerCanvas.setLineEnabled(name, value);
     });
-    ruler.canvas.style = `width: ${rect.width}px; height: ${50}px`;
+    ruler.canvas.width = rect.width + 'px';
+    ruler.canvas.height = '50px';
+
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(ruler.canvas);
