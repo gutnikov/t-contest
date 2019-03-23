@@ -1,7 +1,7 @@
-// blinking numbers
-// Canvas resize breaks ruler
 // Night mode for a page
 // Use same colors as on demo (themes)
+// Blinking numbers
+// Canvas resize breaks ruler
 
 class ChartCanvas {
     constructor(width, height, data, hasRulers, p0, p1) {
@@ -20,8 +20,7 @@ class ChartCanvas {
             const values = line.slice(1);
             if (data.types[name] === 'line') {
                 this.lines[name] = values;
-            }
-            else if (data.types[name] === 'x') {
+            } else if (data.types[name] === 'x') {
                 this.xOffset = values[0];
                 this.xDates = values.map(v => formatDate(v));
                 this.x = values.map(v => v - this.xOffset);
@@ -32,10 +31,10 @@ class ChartCanvas {
         }, this);
 
         this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names)
-            .reduce(function(all, key){
-            all[key] = true;
-            return all;
-        }, {});
+            .reduce(function(all, key) {
+                all[key] = true;
+                return all;
+            }, {});
         this.linesChanged = false;
 
         // Canvas
@@ -82,7 +81,7 @@ class ChartCanvas {
                 (e.clientY - rect.top) * getDpr());
             const anyLineName = Object.keys(this.lines)[0];
             const anyLine = this.plotPoints[anyLineName];
-            const delta = (anyLine[2][1].x - anyLine[1][1].x)/2;
+            const delta = (anyLine[2][1].x - anyLine[1][1].x) / 2;
             const hInd = anyLine.findIndex(function(ip) {
                 if (ip[0] === null) {
                     return false;
@@ -152,9 +151,9 @@ class ChartCanvas {
     setLinePlotPoints(name) {
         const points = [];
         const xs = this.x.slice(this.i0, this.i1 + 1);
-        const ys = this.lines[name].slice(this.i0, this.i1 +1);
+        const ys = this.lines[name].slice(this.i0, this.i1 + 1);
 
-        for (let i = 0; i < xs.length; i++ ) {
+        for (let i = 0; i < xs.length; i++) {
             const plotPoint = add(invertY(
                 scale(
                     sub(
@@ -191,7 +190,7 @@ class ChartCanvas {
                         sub(
                             v2(this.x1, linePoint(
                                 v2(this.x[this.i1], this.lines[name][this.i1]),
-                                v2(this.x[this.i1+1], this.lines[name][this.i1+1]),
+                                v2(this.x[this.i1 + 1], this.lines[name][this.i1 + 1]),
                                 this.x1
                             ).y),
                             this.sourceOffset
@@ -210,7 +209,7 @@ class ChartCanvas {
     }
 
     fps() {
-        if (!this.curFps)  {
+        if (!this.curFps) {
             this.curFps = 1;
             this.lastCall = Date.now();
         }
@@ -238,28 +237,28 @@ class ChartCanvas {
         this.lastUpdate = Date.now();
         const delta = this.lastUpdate - prevUpdate;
         let changed = false;
-    	for (let k in this.timings) {
-    	    const prev = this.timings[k]();
-    	    const next = this.timings[k](delta);
-    		if (prev !== next) {
-    		    changed = true;
-            }
-    	}
-    	for (let k in this.animations) {
-    	    const anim = this.animations[k];
-    	    if (!anim) {
-    	        continue;
-            }
-    	    const v = anim.call(this);
-    	    if (v === true) {
-    	        this.animations[k] = null;
+        for (let k in this.timings) {
+            const prev = this.timings[k]();
+            const next = this.timings[k](delta);
+            if (prev !== next) {
+                changed = true;
             }
         }
-    	return changed;
+        for (let k in this.animations) {
+            const anim = this.animations[k];
+            if (!anim) {
+                continue;
+            }
+            const v = anim.call(this);
+            if (v === true) {
+                this.animations[k] = null;
+            }
+        }
+        return changed;
     }
 
     inputChanged() {
-        return this.prevP0 !== this.p0 || this.prevP1 !== this.p1; // || Object.keys(this.getLinesChanged()).length;
+        return this.prevP0 !== this.p0 || this.prevP1 !== this.p1;
     }
 
     getLinesChanged() {
@@ -274,13 +273,17 @@ class ChartCanvas {
 
     getMaxHeight(defaultValue) {
         const arrays = Object.keys(this.lines)
-            .filter(function(key) {return this.linesEnabled[key]}, this)
-            .map(function(key){ return this.lines[key]}, this);
+            .filter(function(key) {
+                return this.linesEnabled[key]
+            }, this)
+            .map(function(key) {
+                return this.lines[key]
+            }, this);
         return arrays.length ? splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), 6)[6] : defaultValue;
     }
 
     update() {
-		// Update animation timings
+        // Update animation timings
         if (this.updateTimings() || this.inputChanged() || this.linesChanged) {
             this.setFromPct();
             this.setPlotPoints();
@@ -347,7 +350,7 @@ class ChartCanvas {
     }
 
     handleLinesChanged(changes) {
-        Object.keys(changes).forEach(function(name){
+        Object.keys(changes).forEach(function(name) {
             this.timing('line:' + name, timing(600));
         }, this);
     }
@@ -375,19 +378,19 @@ class ChartCanvas {
     renderLine(name) {
         const points = this.plotPoints[name];
         const t = this.timing('line:' + name);
-        let alpha =  t ? t() : 1;
+        let alpha = t ? t() : 1;
         this.context2d.beginPath();
         this.context2d.strokeStyle = withAlpha(
             this.rgbaColors[name],
             easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
         );
         this.context2d.lineWidth = 2.5 * getDpr();
-        for (let i = 0; i < points.length; i++ ) {
+        for (let i = 0; i < points.length; i++) {
             const p = points[i][1];
             if (i === 0) {
-                this.context2d.moveTo(p.x,p.y);
+                this.context2d.moveTo(p.x, p.y);
             } else {
-                this.context2d.lineTo(p.x,p.y);
+                this.context2d.lineTo(p.x, p.y);
             }
         }
         this.context2d.stroke();
@@ -424,7 +427,7 @@ class ChartCanvas {
         const rv = add(invertY(
             scale(v2(0, y), this.factor
             ), this.plotArea), this.plotAreaPadding);
-        this.context2d.moveTo(20, rv.y) ;
+        this.context2d.moveTo(20, rv.y);
         this.context2d.lineTo(this.plotArea.x, rv.y);
         this.context2d.stroke();
         this.context2d.font = "28px Arial";
@@ -438,7 +441,7 @@ class ChartCanvas {
         }
         const self = this;
         const anyLine = Object.keys(this.lines)[0];
-        const points = Object.keys(this.lines).reduce(function(all, name){
+        const points = Object.keys(this.lines).reduce(function(all, name) {
             const pp = self.plotPoints[name][self.iHover];
             all[name] = {
                 p: pp[1],
@@ -454,7 +457,7 @@ class ChartCanvas {
         ctx.beginPath();
         ctx.strokeStyle = `rgba(224, 224, 224)`;
         ctx.lineWidth = 1 * getDpr();
-        ctx.moveTo(anyPoint.p.x, 0 + this.plotAreaPadding.y) ;
+        ctx.moveTo(anyPoint.p.x, 0 + this.plotAreaPadding.y);
         ctx.lineTo(anyPoint.p.x, this.plotArea.y + this.plotAreaPadding.y);
         ctx.stroke();
         ctx.lineWidth = 2 * getDpr();
@@ -463,7 +466,7 @@ class ChartCanvas {
         Object.keys(points).forEach(function(name) {
             const p = points[name].p;
             const t = this.timing('line:' + name);
-            let alpha =  t ? t() : 1;
+            let alpha = t ? t() : 1;
             ctx.fillStyle = withAlpha('rgba(255,255,255,alpha)', this.linesEnabled[name] ? 1 : 1 - alpha);
             ctx.strokeStyle = withAlpha(
                 this.rgbaColors[name],
@@ -477,22 +480,22 @@ class ChartCanvas {
 
         // Tooltip
         const rectWidth = 200 * getDpr();
-        const rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length/2) + 1);
-        const rectX = points[anyLine].p.x - rectWidth * (1/3);
+        const rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 2) + 1);
+        const rectX = points[anyLine].p.x - rectWidth * (1 / 3);
         const rectY = 10;
         const cornerRadius = 20;
         ctx.strokeStyle = 'rgba(205,205,205)';
         // ctx.lineJoin = "round";
         // ctx.lineWidth = cornerRadius;
         ctx.lineWidth = 1 * getDpr();
-        ctx.strokeRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
+        ctx.strokeRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
         ctx.fillStyle = 'rgba(255,255,255)';
-        ctx.fillRect(rectX+(cornerRadius/2), rectY+(cornerRadius/2), rectWidth-cornerRadius, rectHeight-cornerRadius);
+        ctx.fillRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
 
         // Header
         this.context2d.font = "28px Arial";
         this.context2d.fillStyle = `rgba(0, 0, 0, 1)`;
-        this.context2d.fillText(anyPoint.date, rectX + rectWidth/2 - 50, rectY + 50);
+        this.context2d.fillText(anyPoint.date, rectX + rectWidth / 2 - 50, rectY + 50);
 
         Object.keys(points).forEach(function(name, i) {
             const point = points[name];
@@ -500,7 +503,7 @@ class ChartCanvas {
                 this.rgbaColors[name], 1
             );
             ctx.font = "36px Arial";
-            const itemY = rectY + 100 + Math.floor(i/2) * 100;
+            const itemY = rectY + 100 + Math.floor(i / 2) * 100;
             const itemX = rectX + 50 + (i % 2) * 150;
             ctx.fillText(point.value, itemX, itemY);
             ctx.font = "28px Arial";
@@ -522,7 +525,7 @@ function chartAt(parent, data) {
         `;
     let rect = parent.getBoundingClientRect();
     const width = rect.width;
-    const height = width * (2/3);
+    const height = width * (2 / 3);
     const mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
     const rulerCanvas = new ChartCanvas(width, 50, data, false, 0, 1);
     const ruler = new Ruler({
@@ -538,7 +541,7 @@ function chartAt(parent, data) {
         minMainArea: 0.05,
         touchAreaWidth: 30,
         onChange: function(min, max) {
-            mainCanvas.setRange(min , max);
+            mainCanvas.setRange(min, max);
         }
     });
     const buttons = new Buttons(data, function(name, value) {
@@ -561,7 +564,6 @@ function chartAt(parent, data) {
     // });
     parent.appendChild(element);
 }
-
 
 const container = document.getElementById('container');
 

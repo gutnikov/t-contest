@@ -6,10 +6,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// blinking numbers
-// Canvas resize breaks ruler
 // Night mode for a page
 // Use same colors as on demo (themes)
+// Blinking numbers
+// Canvas resize breaks ruler
 
 var ChartCanvas = function () {
     function ChartCanvas(width, height, data, hasRulers, p0, p1) {
@@ -249,7 +249,7 @@ var ChartCanvas = function () {
     }, {
         key: 'inputChanged',
         value: function inputChanged() {
-            return this.prevP0 !== this.p0 || this.prevP1 !== this.p1; // || Object.keys(this.getLinesChanged()).length;
+            return this.prevP0 !== this.p0 || this.prevP1 !== this.p1;
         }
     }, {
         key: 'getLinesChanged',

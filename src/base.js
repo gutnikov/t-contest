@@ -43,54 +43,12 @@ function animated(from, to, t) {
     return from + (to - from) * t;
 }
 
-function animate(v2from, v2to, durationSec, easingFn, timeStarted) {
-    return function(now) {
-        const t = (now - timeStarted) / (durationSec * 1000);
-        // Finished?
-        if (t > 1) {
-            return null;
-        } else {
-            const et = easingFn(t);
-            const delta = sub(v2to, v2from);
-            return [t, add(v2from, v2(delta.x * et, delta.y * et))];
-        }
-    }
-}
-
-// no easing, no acceleration
-function linear(t) { return t }
-// accelerating from zero velocity
 function easeInQuad(t) { return t*t }
-// decelerating to zero velocity
-function easeOutQuad(t) { return t*(2-t) }
-// acceleration until halfway, then deceleration
-function easeInOutQuad(t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t }
-// accelerating from zero velocity
-function easeInCubic(t) { return t*t*t }
-// decelerating to zero velocity
-function easeOutCubic(t) { return (--t)*t*t+1 }
-// acceleration until halfway, then deceleration
-function easeInOutCubic(t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 }
-// accelerating from zero velocity
 function easeInQuart(t) { return t*t*t*t }
-// decelerating to zero velocity
-function easeOutQuart(t) { return 1-(--t)*t*t*t }
-// acceleration until halfway, then deceleration
 function easeInOutQuart(t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t }
-// accelerating from zero velocity
-function easeInQuint(t) { return t*t*t*t*t }
-// decelerating to zero velocity
-function easeOutQuint(t) { return 1+(--t)*t*t*t*t }
-// acceleration until halfway, then deceleration
-function easeInOutQuint(t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
 
 // Vector operations
-function v2(x,y) {
-    return {
-        x,
-        y
-    };
-}
+function v2(x,y) { return { x, y }; }
 
 function add(a, b) {
     return v2(a.x + b.x, a.y + b.y);
@@ -110,13 +68,6 @@ function scale(v, factor) {
 
 function invertY(v, area) {
     return v2(v.x, area.y - v.y);
-}
-
-function desc(a, b) {
-    if (a === b) {
-        return 0;
-    }
-    return a < b ? 1 : -1;
 }
 
 function inRect(x, y, rect) {
@@ -196,18 +147,10 @@ function withAlpha(rgba, alpha) {
 }
 
 const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
+    'Jan', 'Feb', 'Mar',
+    'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep',
+    'Oct', 'Nov', 'Dec'
 ];
 
 function formatDate(time) {

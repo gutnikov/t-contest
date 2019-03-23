@@ -37,7 +37,7 @@ class Ruler {
 
     render() {
         if (this.left !== this.prevLeft || this.right !== this.prevRight) {
-            var ctx = this.canvas.getContext("2d");
+            let ctx = this.canvas.getContext("2d");
             ctx.clearRect(0, 0, this.width, this.height);
             ctx.fillStyle = this.theme.mainColor;
             ctx.fillRect(0, 0, this.width * this.left, this.height);
