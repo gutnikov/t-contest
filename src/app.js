@@ -565,7 +565,6 @@ function chartAt(parent, data) {
 
 const container = document.getElementById('container');
 
-// window.data.forEach(function(data) {
-//     chartAt(container, data);
-// });
-chartAt(container, data[0]);
+window.data.forEach(function(data) {
+    chartAt(container, data);
+});
