@@ -40,7 +40,7 @@ class ChartCanvas {
         // Canvas
         this.canvas = createCanvas(width, height);
         this.context2d = this.canvas.getContext('2d');
-        this.plotAreaPadding = this.hasRulers ? v2(0, 25 * getDpr()) : v2(0, 0);
+        this.plotAreaPadding = this.hasRulers ? v2(0, 50 * getDpr()) : v2(0, 0);
         this.plotArea = v2(
             this.canvas.width - this.plotAreaPadding.x * 2,
             this.canvas.height - this.plotAreaPadding.y * 2);
@@ -372,7 +372,7 @@ class ChartCanvas {
             this.rgbaColors[name],
             easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha)
         );
-        this.context2d.lineWidth = 8 * getDpr();
+        this.context2d.lineWidth = 5 * getDpr();
         for (let i = 0; i < points.length; i++ ) {
             const p = points[i][1];
             if (i === 0) {
@@ -396,9 +396,9 @@ class ChartCanvas {
         const x = this.x[i];
         const label = this.xDates[i];
         const v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
-        this.context2d.font = "28px Arial";
+        this.context2d.font = "45px Arial";
         this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-        this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y * 2 - 10);
+        this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y * 2 - 30);
     }
 
     renderYRulers() {
@@ -418,9 +418,9 @@ class ChartCanvas {
         this.context2d.moveTo(20, rv.y) ;
         this.context2d.lineTo(this.plotArea.x, rv.y);
         this.context2d.stroke();
-        this.context2d.font = "28px Arial";
+        this.context2d.font = "45px Arial";
         this.context2d.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-        this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 18);
+        this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 35);
     }
 
     renderTooltip() {
