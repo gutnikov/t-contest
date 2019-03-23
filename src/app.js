@@ -1,5 +1,8 @@
 // Night mode for a page
 // Use same colors as on demo (themes)
+
+// less lines for phones
+// put left to 0 right to 100% - rulers disapear
 // Blinking numbers
 // Canvas resize breaks ruler
 
@@ -45,7 +48,7 @@ class ChartCanvas {
             this.canvas.width - this.plotAreaPadding.x * 2,
             this.canvas.height - this.plotAreaPadding.y * 2);
 
-        this.yRangeSteps = 6;
+        this.yRangeSteps = 5;
         this.xRangeSteps = 6;
         this.stepsScale = stepsScale(0, this.x.length - 1, this.xRangeSteps);
 
@@ -279,7 +282,7 @@ class ChartCanvas {
             .map(function(key) {
                 return this.lines[key]
             }, this);
-        return arrays.length ? splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), 6)[6] : defaultValue;
+        return arrays.length ? splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), this.yRangeSteps)[this.yRangeSteps] : defaultValue;
     }
 
     update() {
@@ -307,8 +310,8 @@ class ChartCanvas {
             this.prevI0 = this.i0;
             this.prevI1 = this.i1;
             this.linesChanged = false;
+            this.render();
         }
-        this.render();
         requestAnimFrame(this.update);
     }
 
@@ -340,7 +343,7 @@ class ChartCanvas {
         const t = this.timing('changeHeight', timing(600));
         const current = this.sourceArea.y;
         this.prevYRulers = this.yRulers;
-        this.yRulers = splitRange(0, this.sourceHeight, 6);
+        this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);
         this.animation('lines', function() {
             const tv = t();
             this.sourceArea.y = animated(current, this.sourceHeight, easeInOutQuart(tv));
@@ -538,7 +541,7 @@ function chartAt(parent, data) {
         },
         left: p0,
         right: p1,
-        minMainArea: 0.05,
+        minMainArea: 0.005,
         touchAreaWidth: 30,
         onChange: function(min, max) {
             mainCanvas.setRange(min, max);

@@ -271,7 +271,6 @@ var Ruler = function () {
                 ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
                 this.prevLeft = this.left;
                 this.prevRight = this.right;
-                console.log('rendering');
             }
             requestAnimFrame(this.render);
         }
@@ -377,6 +376,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // Night mode for a page
 // Use same colors as on demo (themes)
+
+// less lines for phones
+// put left to 0 right to 100% - rulers disapear
 // Blinking numbers
 // Canvas resize breaks ruler
 
@@ -427,7 +429,7 @@ var ChartCanvas = function () {
         this.plotAreaPadding = this.hasRulers ? v2(0, 50 * getDpr()) : v2(0, 0);
         this.plotArea = v2(this.canvas.width - this.plotAreaPadding.x * 2, this.canvas.height - this.plotAreaPadding.y * 2);
 
-        this.yRangeSteps = 6;
+        this.yRangeSteps = 5;
         this.xRangeSteps = 6;
         this.stepsScale = stepsScale(0, this.x.length - 1, this.xRangeSteps);
 
@@ -639,7 +641,7 @@ var ChartCanvas = function () {
             }, this).map(function (key) {
                 return this.lines[key];
             }, this);
-            return arrays.length ? splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), 6)[6] : defaultValue;
+            return arrays.length ? splitRange(0, arraysMaxValue(arrays, this.i0, this.i1), this.yRangeSteps)[this.yRangeSteps] : defaultValue;
         }
     }, {
         key: 'update',
@@ -668,8 +670,8 @@ var ChartCanvas = function () {
                 this.prevI0 = this.i0;
                 this.prevI1 = this.i1;
                 this.linesChanged = false;
+                this.render();
             }
-            this.render();
             requestAnimFrame(this.update);
         }
     }, {
@@ -714,7 +716,7 @@ var ChartCanvas = function () {
             var t = this.timing('changeHeight', timing(600));
             var current = this.sourceArea.y;
             this.prevYRulers = this.yRulers;
-            this.yRulers = splitRange(0, this.sourceHeight, 6);
+            this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);
             this.animation('lines', function () {
                 var tv = t();
                 this.sourceArea.y = animated(current, this.sourceHeight, easeInOutQuart(tv));
@@ -920,7 +922,7 @@ function chartAt(parent, data) {
         },
         left: p0,
         right: p1,
-        minMainArea: 0.05,
+        minMainArea: 0.005,
         touchAreaWidth: 30,
         onChange: function onChange(min, max) {
             mainCanvas.setRange(min, max);

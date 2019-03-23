@@ -51,7 +51,6 @@ class Ruler {
             ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
             this.prevLeft = this.left;
             this.prevRight = this.right;
-            console.log('rendering');
         }
         requestAnimFrame(this.render);
     }
