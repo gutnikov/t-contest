@@ -57,8 +57,8 @@ var ChartCanvas = function () {
         this.plotAreaPadding = this.hasRulers ? v2(0, 50 * getDpr()) : v2(0, 0);
         this.plotArea = v2(this.canvas.width - this.plotAreaPadding.x * 2, this.canvas.height - this.plotAreaPadding.y * 2);
 
-        this.yRangeSteps = 5;
-        this.xRangeSteps = 9;
+        this.yRangeSteps = 6;
+        this.xRangeSteps = 6;
         this.stepsScale = stepsScale(0, this.x.length - 1, this.xRangeSteps);
 
         this.p0 = p0;
@@ -366,7 +366,7 @@ var ChartCanvas = function () {
                 this.renderXRulers();
             }
             this.renderLines();
-            // this.renderTooltip(10);
+            this.renderTooltip(10);
             this.fps();
         }
     }, {
@@ -384,7 +384,7 @@ var ChartCanvas = function () {
             var alpha = t ? t() : 1;
             this.context2d.beginPath();
             this.context2d.strokeStyle = withAlpha(this.rgbaColors[name], easeInOutQuart(this.linesEnabled[name] ? alpha : 1 - alpha));
-            this.context2d.lineWidth = 5 * getDpr();
+            this.context2d.lineWidth = 2.5 * getDpr();
             for (var i = 0; i < points.length; i++) {
                 var p = points[i][1];
                 if (i === 0) {
@@ -418,7 +418,7 @@ var ChartCanvas = function () {
             var x = this.x[i];
             var label = this.xDates[i];
             var v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
-            this.context2d.font = "45px Arial";
+            this.context2d.font = "28px Arial";
             this.context2d.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
             this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y * 2 - 30);
         }
@@ -446,7 +446,7 @@ var ChartCanvas = function () {
             this.context2d.moveTo(20, rv.y);
             this.context2d.lineTo(this.plotArea.x, rv.y);
             this.context2d.stroke();
-            this.context2d.font = "45px Arial";
+            this.context2d.font = "28px Arial";
             this.context2d.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
             this.context2d.fillText(String(Math.ceil(y)), 30, rv.y - 35);
         }
@@ -537,10 +537,10 @@ function chartAt(parent, data) {
     var width = rect.width;
     var height = width * (2 / 3);
     var mainCanvas = new ChartCanvas(width, height, data, true, p0, p1);
-    var rulerCanvas = new ChartCanvas(width, 100, data, false, 0, 1);
+    var rulerCanvas = new ChartCanvas(width, 50, data, false, 0, 1);
     var ruler = new Ruler({
         width: rect.width * getDpr(),
-        height: 100 * getDpr(),
+        height: 50 * getDpr(),
         theme: {
             mainColor: 'rgba(0,0,0,0.3)',
             borderColor: 'rgba(0,0,0, 0.5)',
@@ -558,7 +558,7 @@ function chartAt(parent, data) {
         mainCanvas.setLineEnabled(name, value);
         rulerCanvas.setLineEnabled(name, value);
     });
-    ruler.canvas.style = 'width: ' + rect.width + 'px; height: ' + 100 + 'px';
+    ruler.canvas.style = 'width: ' + rect.width + 'px; height: ' + 50 + 'px';
     element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
     element.querySelector('.chart-ruler').appendChild(ruler.canvas);
