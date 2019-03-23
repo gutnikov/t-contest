@@ -286,6 +286,27 @@ var Ruler = function () {
             this.canvas.addEventListener("touchstart", this.handleDown.bind(this, this.getTouchCords), false);
             this.canvas.addEventListener("touchend", this.handleUp.bind(this, this.getTouchCords), false);
             this.canvas.addEventListener("touchmove", this.handleMove.bind(this, this.getTouchCords), false);
+            this.noBodyScroll();
+        }
+    }, {
+        key: "noBodyScroll",
+        value: function noBodyScroll() {
+            var canvas = this.canvas;
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
         }
     }, {
         key: "handleDown",
@@ -482,26 +503,6 @@ var ChartCanvas = function () {
             this.canvas.addEventListener('mouseout', function (e) {
                 this.iHover = null;
             }.bind(this));
-        }
-    }, {
-        key: 'bodyNoScroll',
-        value: function bodyNoScroll() {
-            var canvas = this.canvas;
-            document.body.addEventListener("touchstart", function (e) {
-                if (e.target == canvas) {
-                    e.preventDefault();
-                }
-            }, false);
-            document.body.addEventListener("touchend", function (e) {
-                if (e.target == canvas) {
-                    e.preventDefault();
-                }
-            }, false);
-            document.body.addEventListener("touchmove", function (e) {
-                if (e.target == canvas) {
-                    e.preventDefault();
-                }
-            }, false);
         }
     }, {
         key: 'setSize',
