@@ -536,7 +536,7 @@ class ChartCanvas {
         // Tooltip
         const rectWidth = 130 * getDpr();
         const rectHeight = 50 * getDpr() * (Math.ceil(lineNames.length / 1) + 1);
-        const rectX = points[anyLine].p.x + rectWidth > this.width ?
+        const rectX = points[anyLine].p.x  > (this.width * getDpr())/2 ?
             points[anyLine].p.x - rectWidth - 30 * getDpr() :
             points[anyLine].p.x + 30 * getDpr();
         const rectY = 10;
