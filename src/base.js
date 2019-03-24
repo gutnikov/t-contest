@@ -75,6 +75,10 @@ function invertY(v, area) {
     return v2(v.x, area.y - v.y);
 }
 
+function ints(v) {
+    return v2(Math.round(v.x), Math.round(v.y));
+}
+
 function inRect(x, y, rect) {
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }

@@ -82,6 +82,10 @@ function invertY(v, area) {
     return v2(v.x, area.y - v.y);
 }
 
+function ints(v) {
+    return v2(Math.round(v.x), Math.round(v.y));
+}
+
 function inRect(x, y, rect) {
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
@@ -234,6 +238,7 @@ var Buttons = function () {
             var name = event.target.name;
             var parent = event.target.closest('.tl_checkbox_container');
             parent.style.background = checked ? this.buttons[name].color : 'transparent';
+            parent.querySelector('.tl_scheckbox').style.visibility = checked ? 'visible' : 'hidden';
             this.onChange(name, checked);
         }
     }, {
@@ -337,17 +342,23 @@ var Ruler = function () {
             var canvas = this.canvas;
             document.body.addEventListener("touchstart", function (e) {
                 if (e.target == canvas) {
-                    e.preventDefault();
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
                 }
             }, false);
             document.body.addEventListener("touchend", function (e) {
                 if (e.target == canvas) {
-                    e.preventDefault();
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
                 }
             }, false);
             document.body.addEventListener("touchmove", function (e) {
                 if (e.target == canvas) {
-                    e.preventDefault();
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
                 }
             }, false);
         }
@@ -493,6 +504,7 @@ var ChartCanvas = function () {
         this.linesChanged = false;
 
         // Canvas
+        this.width = width;
         this.canvas = createCanvas(width, height);
         this.tooltipCanvas = createCanvas(width, height);
         this.context2d = this.canvas.getContext('2d');
@@ -523,7 +535,9 @@ var ChartCanvas = function () {
         this.animations = [];
 
         this.lastUpdate = Date.now();
-        this.setEvents();
+        if (this.hasRulers) {
+            this.setEvents();
+        }
         this.update = this.update.bind(this);
         this.render();
         this.update();
@@ -532,24 +546,64 @@ var ChartCanvas = function () {
     _createClass(ChartCanvas, [{
         key: 'setEvents',
         value: function setEvents() {
-            this.tooltipCanvas.addEventListener('mousemove', function (e) {
-                var rect = this.canvas.getBoundingClientRect();
-                var cords = v2((e.clientX - rect.left) * getDpr(), (e.clientY - rect.top) * getDpr());
-                var anyLineName = Object.keys(this.lines)[0];
-                var anyLine = this.plotPoints[anyLineName];
-                var delta = (anyLine[2][1].x - anyLine[1][1].x) / 2;
-                var hInd = anyLine.findIndex(function (ip) {
-                    if (ip[0] === null) {
-                        return false;
-                    }
-                    return ip[1].x >= cords.x - delta && ip[1].x <= cords.x + delta;
-                });
-                this.iHover = hInd !== -1 ? hInd : null;
-            }.bind(this));
-
-            this.tooltipCanvas.addEventListener('mouseout', function (e) {
-                this.iHover = null;
-            }.bind(this));
+            var mCords = this.getMouseCords.bind(this);
+            var tCords = this.getTouchCords.bind(this);
+            this.tooltipCanvas.addEventListener('mousemove', this.touchMove.bind(this, mCords));
+            this.tooltipCanvas.addEventListener('mouseout', this.touchEnd.bind(this, mCords));
+            this.tooltipCanvas.addEventListener('touchmove', this.touchMove.bind(this, tCords));
+            this.tooltipCanvas.addEventListener('touchend', this.touchEnd.bind(this, tCords));
+        }
+    }, {
+        key: 'touchMove',
+        value: function touchMove(getCords, e) {
+            var cords = getCords(e);
+            var anyLineName = Object.keys(this.lines)[0];
+            var anyLine = this.plotPoints[anyLineName];
+            var delta = (anyLine[2][1].x - anyLine[1][1].x) / 2;
+            var hInd = anyLine.findIndex(function (ip) {
+                if (ip[0] === null) {
+                    return false;
+                }
+                return ip[1].x >= cords.x - delta && ip[1].x <= cords.x + delta;
+            });
+            this.iHover = hInd !== -1 ? hInd : null;
+        }
+    }, {
+        key: 'getTouchCords',
+        value: function getTouchCords(e) {
+            var rect = this.tooltipCanvas.getBoundingClientRect();
+            return v2((e.touches[0].clientX - rect.left) * getDpr(), (e.touches[0].clientY - rect.top) * getDpr());
+        }
+    }, {
+        key: 'getMouseCords',
+        value: function getMouseCords(e) {
+            var rect = this.tooltipCanvas.getBoundingClientRect();
+            return v2((e.clientX - rect.left) * getDpr(), (e.clientY - rect.top) * getDpr());
+        }
+    }, {
+        key: 'touchEnd',
+        value: function touchEnd() {
+            this.iHover = null;
+        }
+    }, {
+        key: 'noBodyScroll',
+        value: function noBodyScroll() {
+            var canvas = this.tooltipCanvas;
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target == canvas) {
+                    e.preventDefault();
+                }
+            }, false);
         }
 
         // setSize(w, h) {
@@ -614,17 +668,17 @@ var ChartCanvas = function () {
             var ys = this.lines[name].slice(this.i0, this.i1 + 1);
 
             for (var i = 0; i < xs.length; i++) {
-                var plotPoint = add(invertY(scale(sub(v2(xs[i], ys[i]), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding);
+                var plotPoint = ints(add(invertY(scale(sub(v2(xs[i], ys[i]), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding));
                 points.push([this.i0 + i, plotPoint]);
             }
 
             // First point
             if (this.i0 > 0) {
-                points.unshift([null, add(invertY(scale(sub(v2(this.x0, linePoint(v2(this.x[this.i0 - 1], this.lines[name][this.i0 - 1]), v2(this.x[this.i0], this.lines[name][this.i0]), this.x0).y), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding)]);
+                points.unshift([null, ints(add(invertY(scale(sub(v2(this.x0, linePoint(v2(this.x[this.i0 - 1], this.lines[name][this.i0 - 1]), v2(this.x[this.i0], this.lines[name][this.i0]), this.x0).y), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding))]);
             }
             // Last point
             if (this.i1 < this.lines[name].length - 2) {
-                points.push([null, add(invertY(scale(sub(v2(this.x1, linePoint(v2(this.x[this.i1], this.lines[name][this.i1]), v2(this.x[this.i1 + 1], this.lines[name][this.i1 + 1]), this.x1).y), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding)]);
+                points.push([null, ints(add(invertY(scale(sub(v2(this.x1, linePoint(v2(this.x[this.i1], this.lines[name][this.i1]), v2(this.x[this.i1 + 1], this.lines[name][this.i1 + 1]), this.x1).y), this.sourceOffset), this.factor), this.plotArea), this.plotAreaPadding))]);
             }
             return points;
         }
@@ -868,7 +922,7 @@ var ChartCanvas = function () {
             var v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
             this.context2d.font = "28px Arial";
             this.context2d.fillStyle = withAlpha(this.theme.get('rulerName'), alpha);
-            this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y * 2 - 30);
+            this.context2d.fillText(label, v.x - 50, this.plotArea.y + this.plotAreaPadding.y + 40);
         }
     }, {
         key: 'renderYRulers',
@@ -942,18 +996,33 @@ var ChartCanvas = function () {
             }, this);
 
             // Tooltip
-            var rectWidth = 200 * getDpr();
-            var rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 2) + 1);
-            var rectX = points[anyLine].p.x - rectWidth * (1 / 3);
+            var rectWidth = 130 * getDpr();
+            var rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 1) + 1);
+            var rectX = points[anyLine].p.x + rectWidth > this.width ? points[anyLine].p.x - rectWidth - 30 : points[anyLine].p.x + 30;
             var rectY = 10;
-            var cornerRadius = 20;
-            ctx.strokeStyle = withAlpha(this.theme.get('border2'), 1);
-            // ctx.lineJoin = "round";
-            // ctx.lineWidth = cornerRadius;
+            var r = 40;
+            // const rsq = Math.sqrt(r*r);
+            ctx.strokeStyle = withAlpha(this.theme.get('border'), 1);
             ctx.lineWidth = 1 * getDpr();
-            ctx.strokeRect(rectX + cornerRadius / 2, rectY + cornerRadius / 2, rectWidth - cornerRadius, rectHeight - cornerRadius);
             ctx.fillStyle = withAlpha(this.theme.get('bg'));
-            ctx.fillRect(rectX + cornerRadius / 2, rectY + cornerRadius / 2, rectWidth - cornerRadius, rectHeight - cornerRadius);
+
+            ctx.beginPath();
+            // left top
+            ctx.moveTo(rectX + r, rectY);
+            // right top
+            ctx.lineTo(rectX + rectWidth - r, rectY);
+            ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + r);
+            // right bottom
+            ctx.lineTo(rectX + rectWidth, rectY + rectHeight - r);
+            ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - r, rectY + rectHeight);
+            // left bottom
+            ctx.lineTo(rectX + r, rectY + rectHeight);
+            ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - r);
+            // left top
+            ctx.lineTo(rectX, rectY + r);
+            ctx.quadraticCurveTo(rectX, rectY, rectX + r, rectY);
+            ctx.fill();
+            ctx.stroke();
 
             // Header
             ctx.font = "28px Arial";
@@ -964,8 +1033,8 @@ var ChartCanvas = function () {
                 var point = points[name];
                 ctx.fillStyle = withAlpha(this.rgbaColors[name], 1);
                 ctx.font = "36px Arial";
-                var itemY = rectY + 100 + Math.floor(i / 2) * 100;
-                var itemX = rectX + 50 + i % 2 * 150;
+                var itemY = rectY + 100 + Math.floor(i / 1) * 90;
+                var itemX = rectX + 50 + i % 1 * 150;
                 ctx.fillText(point.value, itemX, itemY);
                 ctx.font = "28px Arial";
                 ctx.fillText(this.names[name], itemX, itemY + 34);
@@ -978,20 +1047,14 @@ var ChartCanvas = function () {
 
 'use strict';
 
-// fix hover
-// fix buttons on old safari
-// normal dialog on hover
-// put date on the middle of the point
-// put hover on separate canvas
-// put hrules on separate canvas?
-// drobniye koordinaty?
-// less lines for phones
 // put left to 0 right to 100% - rulers disapear
 // Blinking numbers
 // rewrite no classes
+// Provide github link
+
 // h animations sometimes looks strange
 // Canvas resize breaks ruler
-// Provide github link
+// fix buttons on old safari
 
 // Theme
 var theme = new Theme({

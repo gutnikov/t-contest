@@ -35,6 +35,7 @@ class ChartCanvas {
         this.linesChanged = false;
 
         // Canvas
+        this.width = width;
         this.canvas = createCanvas(width, height);
         this.tooltipCanvas = createCanvas(width, height);
         this.context2d = this.canvas.getContext('2d');
@@ -67,32 +68,71 @@ class ChartCanvas {
         this.animations = [];
 
         this.lastUpdate = Date.now();
-        this.setEvents();
+        if (this.hasRulers) {
+            this.setEvents();
+        }
         this.update = this.update.bind(this);
         this.render();
         this.update();
     }
 
     setEvents() {
-        this.tooltipCanvas.addEventListener('mousemove', function(e) {
-            const rect = this.canvas.getBoundingClientRect();
-            const cords = v2((e.clientX - rect.left) * getDpr(),
-                (e.clientY - rect.top) * getDpr());
-            const anyLineName = Object.keys(this.lines)[0];
-            const anyLine = this.plotPoints[anyLineName];
-            const delta = (anyLine[2][1].x - anyLine[1][1].x) / 2;
-            const hInd = anyLine.findIndex(function(ip) {
-                if (ip[0] === null) {
-                    return false;
-                }
-                return ip[1].x >= cords.x - delta && ip[1].x <= cords.x + delta;
-            });
-            this.iHover = hInd !== -1 ? hInd : null;
-        }.bind(this));
+        const mCords = this.getMouseCords.bind(this);
+        const tCords = this.getTouchCords.bind(this);
+        this.tooltipCanvas.addEventListener('mousemove', this.touchMove.bind(this, mCords));
+        this.tooltipCanvas.addEventListener('mouseout', this.touchEnd.bind(this, mCords));
+        this.tooltipCanvas.addEventListener('touchmove', this.touchMove.bind(this, tCords) );
+        this.tooltipCanvas.addEventListener('touchend', this.touchEnd.bind(this, tCords));
+    }
 
-        this.tooltipCanvas.addEventListener('mouseout', function(e) {
-            this.iHover = null;
-        }.bind(this));
+    touchMove(getCords, e) {
+        const cords = getCords(e);
+        const anyLineName = Object.keys(this.lines)[0];
+        const anyLine = this.plotPoints[anyLineName];
+        const delta = (anyLine[2][1].x - anyLine[1][1].x) / 2;
+        const hInd = anyLine.findIndex(function(ip) {
+            if (ip[0] === null) {
+                return false;
+            }
+            return ip[1].x >= cords.x - delta && ip[1].x <= cords.x + delta;
+        });
+        this.iHover = hInd !== -1 ? hInd : null;
+    }
+
+    getTouchCords(e) {
+        const rect = this.tooltipCanvas.getBoundingClientRect();
+        return v2(
+            (e.touches[0].clientX - rect.left) * getDpr(),
+            (e.touches[0].clientY - rect.top) * getDpr());
+    }
+
+    getMouseCords(e) {
+        const rect = this.tooltipCanvas.getBoundingClientRect();
+        return v2((e.clientX - rect.left) * getDpr(),
+            (e.clientY - rect.top) * getDpr());
+    }
+
+    touchEnd() {
+        this.iHover = null;
+    }
+
+    noBodyScroll() {
+        let canvas = this.tooltipCanvas;
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, false);
     }
 
     // setSize(w, h) {
@@ -153,21 +193,21 @@ class ChartCanvas {
         const ys = this.lines[name].slice(this.i0, this.i1 + 1);
 
         for (let i = 0; i < xs.length; i++) {
-            const plotPoint = add(invertY(
+            const plotPoint = ints(add(invertY(
                 scale(
                     sub(
                         v2(xs[i], ys[i]),
                         this.sourceOffset
                     ),
                     this.factor
-                ), this.plotArea), this.plotAreaPadding);
+                ), this.plotArea), this.plotAreaPadding));
             points.push([this.i0 + i, plotPoint]);
         }
 
         // First point
         if (this.i0 > 0) {
             points.unshift([null,
-                add(invertY(
+                ints(add(invertY(
                     scale(
                         sub(
                             v2(this.x0, linePoint(
@@ -178,13 +218,13 @@ class ChartCanvas {
                             this.sourceOffset
                         ),
                         this.factor
-                    ), this.plotArea), this.plotAreaPadding)
+                    ), this.plotArea), this.plotAreaPadding))
             ]);
         }
         // Last point
         if (this.i1 < this.lines[name].length - 2) {
             points.push([null,
-                add(invertY(
+                ints(add(invertY(
                     scale(
                         sub(
                             v2(this.x1, linePoint(
@@ -195,7 +235,7 @@ class ChartCanvas {
                             this.sourceOffset
                         ),
                         this.factor
-                    ), this.plotArea), this.plotAreaPadding)
+                    ), this.plotArea), this.plotAreaPadding))
             ]);
         }
         return points;
@@ -410,7 +450,7 @@ class ChartCanvas {
         const v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
         this.context2d.font = "28px Arial";
         this.context2d.fillStyle = withAlpha(this.theme.get('rulerName'), alpha);
-        this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y * 2 - 30);
+        this.context2d.fillText(label, v.x - 50, this.plotArea.y + this.plotAreaPadding.y + 40);
     }
 
     renderYRulers() {
@@ -482,18 +522,35 @@ class ChartCanvas {
         }, this);
 
         // Tooltip
-        const rectWidth = 200 * getDpr();
-        const rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 2) + 1);
-        const rectX = points[anyLine].p.x - rectWidth * (1 / 3);
+        const rectWidth = 130 * getDpr();
+        const rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 1) + 1);
+        const rectX = points[anyLine].p.x + rectWidth > this.width ?
+            points[anyLine].p.x - rectWidth - 30 :
+            points[anyLine].p.x + 30;
         const rectY = 10;
-        const cornerRadius = 20;
-        ctx.strokeStyle = withAlpha(this.theme.get('border2'), 1);
-        // ctx.lineJoin = "round";
-        // ctx.lineWidth = cornerRadius;
+        const r = 40;
+        // const rsq = Math.sqrt(r*r);
+        ctx.strokeStyle = withAlpha(this.theme.get('border'), 1);
         ctx.lineWidth = 1 * getDpr();
-        ctx.strokeRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
         ctx.fillStyle = withAlpha(this.theme.get('bg'));
-        ctx.fillRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
+
+        ctx.beginPath();
+        // left top
+        ctx.moveTo(rectX + r, rectY);
+        // right top
+        ctx.lineTo(rectX + rectWidth - r, rectY);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + r);
+        // right bottom
+        ctx.lineTo(rectX + rectWidth, rectY + rectHeight - r);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - r, rectY + rectHeight);
+        // left bottom
+        ctx.lineTo(rectX + r, rectY + rectHeight);
+        ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - r);
+        // left top
+        ctx.lineTo(rectX, rectY + r);
+        ctx.quadraticCurveTo(rectX, rectY, rectX + r, rectY);
+        ctx.fill();
+        ctx.stroke();
 
         // Header
         ctx.font = "28px Arial";
@@ -506,8 +563,8 @@ class ChartCanvas {
                 this.rgbaColors[name], 1
             );
             ctx.font = "36px Arial";
-            const itemY = rectY + 100 + Math.floor(i / 2) * 100;
-            const itemX = rectX + 50 + (i % 2) * 150;
+            const itemY = rectY + 100 + Math.floor(i / 1) * 90;
+            const itemX = rectX + 50 + (i % 1) * 150;
             ctx.fillText(point.value, itemX, itemY);
             ctx.font = "28px Arial";
             ctx.fillText(this.names[name], itemX, itemY + 34);

@@ -1,18 +1,12 @@
 
-// fix hover
-// fix buttons on old safari
-// normal dialog on hover
-// put date on the middle of the point
-// put hover on separate canvas
-// put hrules on separate canvas?
-// drobniye koordinaty?
-// less lines for phones
 // put left to 0 right to 100% - rulers disapear
 // Blinking numbers
 // rewrite no classes
+// Provide github link
+
 // h animations sometimes looks strange
 // Canvas resize breaks ruler
-// Provide github link
+// fix buttons on old safari
 
 // Theme
 const theme = new Theme({

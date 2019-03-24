@@ -25,6 +25,7 @@ class Buttons {
         const name = event.target.name;
         const parent = event.target.closest('.tl_checkbox_container');
         parent.style.background = checked ? this.buttons[name].color : 'transparent';
+        parent.querySelector('.tl_scheckbox').style.visibility = checked ? 'visible' : 'hidden';
         this.onChange(name, checked);
     }
 
