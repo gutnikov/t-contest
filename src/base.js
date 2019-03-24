@@ -7,6 +7,10 @@ window.requestAnimFrame = (function(){
         };
 })();
 
+function $(q, p) {
+    return (p || document).querySelector(q);
+}
+
 function createCanvas(w, h, dpr) {
     const canvas = document.createElement('canvas');
     setCanvasSize(canvas, w,h, dpr);

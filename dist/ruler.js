@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -16,6 +16,8 @@ var Ruler = function () {
             leftDown: false,
             rightDown: false,
             mainDown: false,
+            borderTop: 1 * getDpr(),
+            borderSide: 6 * getDpr(),
             counter: 0
         });
         this.canvas = createCanvas(this.width, this.height, 1);
@@ -29,38 +31,38 @@ var Ruler = function () {
     }
 
     _createClass(Ruler, [{
-        key: "getTouchCords",
+        key: 'getTouchCords',
         value: function getTouchCords(e) {
             var rect = this.canvas.getBoundingClientRect();
             return v2((e.touches[0].clientX - rect.left) * getDpr(), (e.touches[0].clientY - rect.top) * getDpr());
         }
     }, {
-        key: "getMouseCords",
+        key: 'getMouseCords',
         value: function getMouseCords(e) {
             var rect = this.canvas.getBoundingClientRect();
             return v2((e.clientX - rect.left) * getDpr(), (e.clientY - rect.top) * getDpr());
         }
     }, {
-        key: "render",
+        key: 'render',
         value: function render() {
             if (this.left !== this.prevLeft || this.right !== this.prevRight) {
                 var ctx = this.canvas.getContext("2d");
                 ctx.clearRect(0, 0, this.width, this.height);
-                ctx.fillStyle = this.theme.mainColor;
+                ctx.fillStyle = withAlpha(this.theme.get('border2'), 0.2);
                 ctx.fillRect(0, 0, this.width * this.left, this.height);
                 ctx.fillRect(this.width * this.right, 0, this.width * (1 - this.right), this.height);
-                ctx.fillStyle = this.theme.borderColor;
-                ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.theme.border[0]);
-                ctx.fillRect(this.width * this.left, this.height - this.theme.border[0], this.width * (this.right - this.left), this.theme.border[0]);
-                ctx.fillRect(this.width * this.left, 0, this.theme.border[1], this.height);
-                ctx.fillRect(this.width * this.right - this.theme.border[1], 0, this.theme.border[1], this.height);
+                ctx.fillStyle = withAlpha(this.theme.get('border2'), 0.5);
+                ctx.fillRect(this.width * this.left, 0, this.width * (this.right - this.left), this.borderTop);
+                ctx.fillRect(this.width * this.left, this.height - this.borderTop, this.width * (this.right - this.left), this.borderTop);
+                ctx.fillRect(this.width * this.left, 0, this.borderSide, this.height);
+                ctx.fillRect(this.width * this.right - this.borderSide, 0, this.borderSide, this.height);
                 this.prevLeft = this.left;
                 this.prevRight = this.right;
             }
             requestAnimFrame(this.render);
         }
     }, {
-        key: "setEvents",
+        key: 'setEvents',
         value: function setEvents() {
             // Mouse
             this.canvas.addEventListener("mousedown", this.handleDown.bind(this, this.getMouseCords), false);
@@ -73,7 +75,7 @@ var Ruler = function () {
             this.noBodyScroll();
         }
     }, {
-        key: "noBodyScroll",
+        key: 'noBodyScroll',
         value: function noBodyScroll() {
             var canvas = this.canvas;
             document.body.addEventListener("touchstart", function (e) {
@@ -93,7 +95,7 @@ var Ruler = function () {
             }, false);
         }
     }, {
-        key: "handleDown",
+        key: 'handleDown',
         value: function handleDown(getCords, e) {
             var cords = getCords(e);
             this.downState = {
@@ -102,21 +104,21 @@ var Ruler = function () {
                 right: this.right
             };
             if (inRect(cords.x, cords.y, {
-                left: this.width * this.left + this.theme.border[1] * 3,
-                right: this.width * this.right - this.theme.border[1] * 3,
+                left: this.width * this.left + this.borderSide * 3,
+                right: this.width * this.right - this.borderSide * 3,
                 top: 0,
                 bottom: this.height
             })) {
                 this.mainDown = true;
             } else if (inRect(cords.x, cords.y, {
                 left: this.width * this.left - this.touchAreaWidth,
-                right: this.width * this.left + this.theme.border[1] * 3,
+                right: this.width * this.left + this.borderSide * 3,
                 top: 0,
                 bottom: this.height
             })) {
                 this.leftDown = true;
             } else if (inRect(cords.x, cords.y, {
-                left: this.width * this.right - this.theme.border[1] * 3,
+                left: this.width * this.right - this.borderSide * 3,
                 right: this.width * this.right + this.touchAreaWidth,
                 top: 0,
                 bottom: this.height
@@ -125,12 +127,12 @@ var Ruler = function () {
             }
         }
     }, {
-        key: "handleUp",
+        key: 'handleUp',
         value: function handleUp() {
             this.leftDown = this.rightDown = this.mainDown = false;
         }
     }, {
-        key: "handleMove",
+        key: 'handleMove',
         value: function handleMove(getCords, e) {
             var cords = getCords(e);
             if (this.leftDown) {
@@ -163,7 +165,7 @@ var Ruler = function () {
             }
         }
     }, {
-        key: "handleChange",
+        key: 'handleChange',
         value: function handleChange(left, right) {
             if (this.onChange) {
                 this.onChange(Math.max(0, left), Math.min(1, right));

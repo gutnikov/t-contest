@@ -1,6 +1,4 @@
 
-// Night mode for a page
-// Use same colors as on demo (themes)
 // fix hover
 // fix buttons on old safari
 // normal dialog on hover
@@ -16,7 +14,25 @@
 // Canvas resize breaks ruler
 // Provide github link
 
-
+// Theme
+const theme = new Theme({
+    light: {
+        bg: 'white',
+        main: 'black',
+        rulerName: hexToRgbA('#8f9092'),
+        // border: hexToRgbA('#d1d3d6'),
+        border: hexToRgbA('#a0a0a0'),
+        border2: hexToRgbA('#000000')
+    },
+    dark: {
+        bg: '#242f3d',
+        main: 'white',
+        rulerName: hexToRgbA('#818c98'),
+        border: hexToRgbA('#425061'),
+        border2: hexToRgbA('#000000')
+    }
+});
+theme.activate('dark');
 
 function chartAt(parent, data) {
     // Params
@@ -33,25 +49,6 @@ function chartAt(parent, data) {
     let rect = parent.getBoundingClientRect();
     const width = rect.width;
     const height = width * (2 / 3);
-
-    // Theme
-    const theme = new Theme({
-        light: {
-            bg: 'white',
-            main: 'black',
-            rulerName: hexToRgbA('#8f9092'),
-            border: hexToRgbA('#d1d3d6'),
-            border2: hexToRgbA('#000000')
-        },
-        dark: {
-            bg: '#242f3d',
-            main: 'white',
-            rulerName: hexToRgbA('#818c98'),
-            border: hexToRgbA('#425061'),
-            border2: hexToRgbA('#000000')
-        }
-    });
-    theme.activate('dark');
 
     // Canvases
     const mainCanvas = new ChartCanvas({
@@ -91,10 +88,17 @@ function chartAt(parent, data) {
         mainCanvas.setLineEnabled(name, value);
         rulerCanvas.setLineEnabled(name, value);
     });
-    element.querySelector('.chart-main-canvas').appendChild(mainCanvas.canvas);
-    element.querySelector('.chart-ruler').appendChild(rulerCanvas.canvas);
-    element.querySelector('.chart-ruler').appendChild(ruler.canvas);
-    element.querySelector('.chart-buttons').appendChild(buttons.element);
+
+    const $main = $('.chart-main-canvas', element);
+    $main.appendChild(mainCanvas.canvas);
+    $main.appendChild(mainCanvas.tooltipCanvas);
+    $main.style.height = height + 'px';
+
+    const $chartRuler = $('.chart-ruler', element);
+    $chartRuler.appendChild(rulerCanvas.canvas);
+    $chartRuler.appendChild(ruler.canvas);
+
+    $('.chart-buttons', element).appendChild(buttons.element);
     // window.addEventListener('resize', function() {
     //     const newRect = parent.getBoundingClientRect();
     //     if (newRect.width !== rect.width) {
@@ -109,6 +113,8 @@ function chartAt(parent, data) {
 
 const container = document.getElementById('container');
 
-window.data.forEach(function(data) {
-    chartAt(container, data);
-});
+// window.data.forEach(function(data) {
+//     chartAt(container, data);
+// });
+
+chartAt(container, data[2]);

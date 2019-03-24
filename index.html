@@ -26,8 +26,41 @@
             box-sizing: border-box;
         }
 
+        #theme-switcher {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            height: 40px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 10;
+            padding: 10px 0;
+            line-height: 40px;
+        }
+
+        .theme-dark #theme-switcher {
+            background-color: white;
+            color: black;
+        }
+
+        .theme-light #theme-switcher {
+            background-color: #242f3d;
+            color: white;
+        }
+
         .chart {
             padding-bottom: 50px;
+        }
+
+        .chart-main-canvas {
+            position: relative;
+        }
+
+        .chart-main-canvas canvas{
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .chart-ruler {
@@ -134,6 +167,8 @@
 <body>
 <div id="container">
     <div id="fps">FPS</div>
+</div>
+<div id="theme-switcher">
 </div>
 <script src="src/data.js"></script>
 <script src="src/base.js"></script>

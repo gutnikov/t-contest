@@ -8,6 +8,7 @@ class ChartCanvas {
             this.rgbaColors[c] = hexToRgbA(data.colors[c]);
         }
         this.theme = theme;
+        this.prevThemeName = this.theme.getName();
 
         this.names = data.names;
         this.lines = {};
@@ -35,7 +36,9 @@ class ChartCanvas {
 
         // Canvas
         this.canvas = createCanvas(width, height);
+        this.tooltipCanvas = createCanvas(width, height);
         this.context2d = this.canvas.getContext('2d');
+        this.tooltipContext2d = this.tooltipCanvas.getContext('2d');
         this.plotAreaPadding = this.hasRulers ? v2(0, 50 * getDpr()) : v2(0, 0);
         this.plotArea = v2(
             this.canvas.width - this.plotAreaPadding.x * 2,
@@ -71,7 +74,7 @@ class ChartCanvas {
     }
 
     setEvents() {
-        this.canvas.addEventListener('mousemove', function(e) {
+        this.tooltipCanvas.addEventListener('mousemove', function(e) {
             const rect = this.canvas.getBoundingClientRect();
             const cords = v2((e.clientX - rect.left) * getDpr(),
                 (e.clientY - rect.top) * getDpr());
@@ -87,18 +90,18 @@ class ChartCanvas {
             this.iHover = hInd !== -1 ? hInd : null;
         }.bind(this));
 
-        this.canvas.addEventListener('mouseout', function(e) {
+        this.tooltipCanvas.addEventListener('mouseout', function(e) {
             this.iHover = null;
         }.bind(this));
     }
 
-    setSize(w, h) {
-        setCanvasSize(this.canvas, w, h);
-        this.plotArea = v2(
-            this.canvas.width - this.plotAreaPadding.x * 2,
-            this.canvas.height - this.plotAreaPadding.y * 2);
-        this.factor = map(this.sourceArea, this.plotArea);
-    }
+    // setSize(w, h) {
+    //     setCanvasSize(this.canvas, w, h);
+    //     this.plotArea = v2(
+    //         this.canvas.width - this.plotAreaPadding.x * 2,
+    //         this.canvas.height - this.plotAreaPadding.y * 2);
+    //     this.factor = map(this.sourceArea, this.plotArea);
+    // }
 
     setRange(p0, p1) {
         this.p0 = p0;
@@ -280,7 +283,7 @@ class ChartCanvas {
 
     update() {
         // Update animation timings
-        if (this.updateTimings() || this.inputChanged() || this.linesChanged) {
+        if (this.updateTimings() || this.inputChanged() || this.linesChanged || this.theme.getName() !== this.prevThemeName) {
             this.setFromPct();
             this.setPlotPoints();
             // run animation
@@ -303,8 +306,10 @@ class ChartCanvas {
             this.prevI0 = this.i0;
             this.prevI1 = this.i1;
             this.linesChanged = false;
+            this.prevThemeName = this.theme.getName();
+            this.render();
         }
-        this.render();
+        this.renderTooltip();
         requestAnimFrame(this.update);
     }
 
@@ -360,7 +365,6 @@ class ChartCanvas {
             this.renderXRulers();
         }
         this.renderLines();
-        this.renderTooltip();
         this.fps();
     }
 
@@ -432,6 +436,9 @@ class ChartCanvas {
     }
 
     renderTooltip() {
+        this.tooltipContext2d.clearRect(
+            0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
+            this.plotArea.y + this.plotAreaPadding.y * 2);
         if (!Number.isFinite(this.iHover)) {
             return;
         }
@@ -448,7 +455,7 @@ class ChartCanvas {
         }, {});
         const anyPoint = points[anyLine];
 
-        const ctx = this.context2d;
+        const ctx = this.tooltipContext2d;
         // Line
         ctx.beginPath();
         ctx.strokeStyle = withAlpha(this.theme.get('border'), 1);
@@ -489,9 +496,9 @@ class ChartCanvas {
         ctx.fillRect(rectX + (cornerRadius / 2), rectY + (cornerRadius / 2), rectWidth - cornerRadius, rectHeight - cornerRadius);
 
         // Header
-        this.context2d.font = "28px Arial";
-        this.context2d.fillStyle = withAlpha(this.theme.get('main'), 1);
-        this.context2d.fillText(anyPoint.date, rectX + rectWidth / 2 - 50, rectY + 50);
+        ctx.font = "28px Arial";
+        ctx.fillStyle = withAlpha(this.theme.get('main'), 1);
+        ctx.fillText(anyPoint.date, rectX + rectWidth / 2 - 50, rectY + 50);
 
         Object.keys(points).forEach(function(name, i) {
             const point = points[name];

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 rm -fr dist
-mkdir dir
 ./node_modules/.bin/babel src -d dist
 cat dist/base.js >> dist/bundle.js
-cat dist/theme.js >> dist/bundle.js
+#cat dist/theme.js >> dist/bundle.js
 cat dist/buttons.js >> dist/bundle.js
 cat dist/ruler.js >> dist/bundle.js
 cat dist/canvas.js >> dist/canvas.js
