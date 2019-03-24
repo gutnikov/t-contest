@@ -27,7 +27,7 @@ class ChartCanvas {
             }
         }, this);
 
-        this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names)
+        this.linesEnabled = Object.keys(data.names)
             .reduce(function(all, key) {
                 all[key] = true;
                 return all;
@@ -300,11 +300,11 @@ class ChartCanvas {
         return this.prevP0 !== this.p0 || this.prevP1 !== this.p1;
     }
 
-    getLinesChanged() {
+    getActiveLines() {
         const result = {};
         for (let k in this.linesEnabled) {
-            if (this.linesEnabled[k] !== this.prevLinesEnabled[k]) {
-                result[k] = this.linesEnabled[k] ? 'on' : 'off';
+            if (this.linesEnabled[k]) {
+                result[k] = true;
             }
         }
         return result;
@@ -333,9 +333,8 @@ class ChartCanvas {
             if (this.sourceHeight !== this.prevSourceHeight) {
                 this.handleYRangeChanged();
             }
-            const linesChanged = this.getLinesChanged();
-            if (Object.keys(linesChanged).length) {
-                this.handleLinesChanged(linesChanged);
+            if (this.linesChanged) {
+                this.handleLinesChanged();
             }
             this.prevP0 = this.p0;
             this.prevP1 = this.p1;
@@ -390,8 +389,9 @@ class ChartCanvas {
         });
     }
 
-    handleLinesChanged(changes) {
-        Object.keys(changes).forEach(function(name) {
+    handleLinesChanged() {
+        const lines = this.getActiveLines();
+        Object.keys(lines).forEach(function(name) {
             this.timing('line:' + name, timing(600));
         }, this);
     }
@@ -479,12 +479,18 @@ class ChartCanvas {
         this.tooltipContext2d.clearRect(
             0, 0, this.plotArea.x + this.plotAreaPadding.x * 2,
             this.plotArea.y + this.plotAreaPadding.y * 2);
+
         if (!Number.isFinite(this.iHover)) {
             return;
         }
+        const activeLines = this.getActiveLines();
+        const lineNames = Object.keys(activeLines);
+        if (!lineNames.length) {
+            return;
+        }
         const self = this;
-        const anyLine = Object.keys(this.lines)[0];
-        const points = Object.keys(this.lines).reduce(function(all, name) {
+        const anyLine = lineNames[0];
+        const points = lineNames.reduce(function(all, name) {
             const pp = self.plotPoints[name][self.iHover];
             all[name] = {
                 p: pp[1],
@@ -523,7 +529,7 @@ class ChartCanvas {
 
         // Tooltip
         const rectWidth = 130 * getDpr();
-        const rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 1) + 1);
+        const rectHeight = 50 * getDpr() * (Math.ceil(lineNames.length / 1) + 1);
         const rectX = points[anyLine].p.x + rectWidth > this.width ?
             points[anyLine].p.x - rectWidth - 30 :
             points[anyLine].p.x + 30;

@@ -497,7 +497,7 @@ var ChartCanvas = function () {
             }
         }, this);
 
-        this.linesEnabled = this.prevLinesEnabled = Object.keys(data.names).reduce(function (all, key) {
+        this.linesEnabled = Object.keys(data.names).reduce(function (all, key) {
             all[key] = true;
             return all;
         }, {});
@@ -750,12 +750,12 @@ var ChartCanvas = function () {
             return this.prevP0 !== this.p0 || this.prevP1 !== this.p1;
         }
     }, {
-        key: 'getLinesChanged',
-        value: function getLinesChanged() {
+        key: 'getActiveLines',
+        value: function getActiveLines() {
             var result = {};
             for (var k in this.linesEnabled) {
-                if (this.linesEnabled[k] !== this.prevLinesEnabled[k]) {
-                    result[k] = this.linesEnabled[k] ? 'on' : 'off';
+                if (this.linesEnabled[k]) {
+                    result[k] = true;
                 }
             }
             return result;
@@ -784,9 +784,8 @@ var ChartCanvas = function () {
                 if (this.sourceHeight !== this.prevSourceHeight) {
                     this.handleYRangeChanged();
                 }
-                var linesChanged = this.getLinesChanged();
-                if (Object.keys(linesChanged).length) {
-                    this.handleLinesChanged(linesChanged);
+                if (this.linesChanged) {
+                    this.handleLinesChanged();
                 }
                 this.prevP0 = this.p0;
                 this.prevP1 = this.p1;
@@ -855,8 +854,9 @@ var ChartCanvas = function () {
         }
     }, {
         key: 'handleLinesChanged',
-        value: function handleLinesChanged(changes) {
-            Object.keys(changes).forEach(function (name) {
+        value: function handleLinesChanged() {
+            var lines = this.getActiveLines();
+            Object.keys(lines).forEach(function (name) {
                 this.timing('line:' + name, timing(600));
             }, this);
         }
@@ -956,12 +956,18 @@ var ChartCanvas = function () {
         key: 'renderTooltip',
         value: function renderTooltip() {
             this.tooltipContext2d.clearRect(0, 0, this.plotArea.x + this.plotAreaPadding.x * 2, this.plotArea.y + this.plotAreaPadding.y * 2);
+
             if (!Number.isFinite(this.iHover)) {
                 return;
             }
+            var activeLines = this.getActiveLines();
+            var lineNames = Object.keys(activeLines);
+            if (!lineNames.length) {
+                return;
+            }
             var self = this;
-            var anyLine = Object.keys(this.lines)[0];
-            var points = Object.keys(this.lines).reduce(function (all, name) {
+            var anyLine = lineNames[0];
+            var points = lineNames.reduce(function (all, name) {
                 var pp = self.plotPoints[name][self.iHover];
                 all[name] = {
                     p: pp[1],
@@ -997,7 +1003,7 @@ var ChartCanvas = function () {
 
             // Tooltip
             var rectWidth = 130 * getDpr();
-            var rectHeight = 50 * getDpr() * (Math.ceil(Object.keys(this.lines).length / 1) + 1);
+            var rectHeight = 50 * getDpr() * (Math.ceil(lineNames.length / 1) + 1);
             var rectX = points[anyLine].p.x + rectWidth > this.width ? points[anyLine].p.x - rectWidth - 30 : points[anyLine].p.x + 30;
             var rectY = 10;
             var r = 40;
