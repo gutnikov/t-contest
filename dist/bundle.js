@@ -339,29 +339,28 @@ var Ruler = function () {
     }, {
         key: 'noBodyScroll',
         value: function noBodyScroll() {
-            // let canvas = this.canvas;
-            // document.body.addEventListener("touchstart", function (e) {
-            //     if (e.target === canvas) {
-            //         try {
-            //             e.preventDefault();
-            //          } catch(e) {}
-            //     }
-            // }, false);
-            // document.body.addEventListener("touchend", function (e) {
-            //     if (e.target === canvas) {
-            //         try {
-            //             e.preventDefault();
-            //         } catch(e) {}
-            //     }
-            // }, false);
-            // document.body.addEventListener("touchmove", function (e) {
-            //     if (e.target === canvas) {
-            //         try {
-            //             e.preventDefault();
-            //         } catch(e) {}
-            //
-            //     }
-            // }, false);
+            var canvas = this.canvas;
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target === canvas) {
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
+                }
+            }, false);
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target === canvas) {
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
+                }
+            }, false);
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target === canvas) {
+                    try {
+                        e.preventDefault();
+                    } catch (e) {}
+                }
+            }, false);
         }
     }, {
         key: 'handleDown',
@@ -589,24 +588,24 @@ var ChartCanvas = function () {
         }
     }, {
         key: 'noBodyScroll',
-        value: function noBodyScroll() {}
-        // let canvas = this.tooltipCanvas;
-        // document.body.addEventListener("touchstart", function (e) {
-        //     if (e.target === canvas) {
-        //         e.preventDefault();
-        //     }
-        // }, false);
-        // document.body.addEventListener("touchend", function (e) {
-        //     if (e.target === canvas) {
-        //         e.preventDefault();
-        //     }
-        // }, false);
-        // document.body.addEventListener("touchmove", function (e) {
-        //     if (e.target === canvas) {
-        //         e.preventDefault();
-        //     }
-        // }, false);
-
+        value: function noBodyScroll() {
+            var canvas = this.tooltipCanvas;
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target === canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target === canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target === canvas) {
+                    e.preventDefault();
+                }
+            }, false);
+        }
 
         // setSize(w, h) {
         //     setCanvasSize(this.canvas, w, h);
