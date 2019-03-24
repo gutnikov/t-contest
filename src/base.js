@@ -31,9 +31,14 @@ function getDpr() {
 }
 
 // Animation and easing functions
-function timing(duration, onFinish) {
+function timing(duration, onFinish, delay) {
     let timePassed = 0;
+    let delayLast = delay || 0;
     return function(delta) {
+        if (delta && (delayLast > 0)) {
+            delayLast -= Math.max(0, delta);
+            return 0;
+        }
         const prev = Math.min(1, timePassed/duration);
         timePassed += (delta || 0);
         const cur = Math.min(1, timePassed/duration);

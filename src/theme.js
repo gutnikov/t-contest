@@ -13,7 +13,6 @@ function Theme(values) {
             switcher.innerText = 'Switch to ' + nextT + ' theme';
             switcher.setAttribute('data-switch-to', nextT);
             theme = t;
-            console.log('Theme = ' + t + ', next = '+ nextT);
         },
         getName: function() {
             return theme;

@@ -159,11 +159,6 @@ class ChartCanvas {
     }
 
     setFromPct() {
-        let isShift = false;
-        if (Number.isFinite(this.prevP0) && Number.isFinite(this.prevP1)) {
-            isShift = this.p0 - this.prevP0 === this.p1 - this.prevP1;
-        }
-
         this.prevP0 = this.p0;
         this.prevP1 = this.p1;
         this.prevX0 = this.x0;
@@ -179,10 +174,6 @@ class ChartCanvas {
         const _1 = this.getXI(this.p1);
         this.x1 = _1[0];
         this.i1 = _1[1];
-
-        if (isShift) {
-            this.i1 = this.i0 + this.prevI1 - this.prevI0;
-        }
 
         this.sourceHeight = this.getMaxHeight(this.prevSourceHeight);
         this.sourceOffset = v2(this.x0, 0);
@@ -363,7 +354,7 @@ class ChartCanvas {
     handleXRangeChanged() {
         const wt = this.timing('changeWidth');
         if (!wt || wt() === 1) {
-            this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
+            this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this), 200));
         }
         let newSteps = [];
         let from = this.i0 % 2 ? this.i0 + 1 : this.i0;
@@ -375,7 +366,6 @@ class ChartCanvas {
             }
             newSteps = steps;
         }
-//         console.log('I: ', this.i0, ',', this.i1, 'TF', from, ',', to, '||', newSteps.length, newSteps);
         if (newSteps.length) {
             this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(v => newSteps.indexOf(v) === -1));
             this.xRulersIn = newSteps.filter(v => this.xRulers.indexOf(v) === -1);
@@ -390,7 +380,7 @@ class ChartCanvas {
     }
 
     handleYRangeChanged() {
-        const t = this.timing('changeHeight', timing(600));
+        const t = this.timing('changeHeight', timing(600, null, 100));
         const current = this.sourceArea.y;
         this.prevYRulers = this.yRulers;
         this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);

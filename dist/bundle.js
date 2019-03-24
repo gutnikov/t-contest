@@ -30,9 +30,14 @@ function getDpr() {
 }
 
 // Animation and easing functions
-function timing(duration, onFinish) {
+function timing(duration, onFinish, delay) {
     var timePassed = 0;
+    var delayLast = delay || 0;
     return function (delta) {
+        if (delta && delayLast > 0) {
+            delayLast -= Math.max(0, delta);
+            return 0;
+        }
         var prev = Math.min(1, timePassed / duration);
         timePassed += delta || 0;
         var cur = Math.min(1, timePassed / duration);
@@ -187,7 +192,6 @@ function Theme(values) {
             switcher.innerText = 'Switch to ' + nextT + ' theme';
             switcher.setAttribute('data-switch-to', nextT);
             theme = t;
-            console.log('Theme = ' + t + ', next = ' + nextT);
         },
         getName: function getName() {
             return theme;
@@ -632,11 +636,6 @@ var ChartCanvas = function () {
     }, {
         key: 'setFromPct',
         value: function setFromPct() {
-            var isShift = false;
-            if (Number.isFinite(this.prevP0) && Number.isFinite(this.prevP1)) {
-                isShift = this.p0 - this.prevP0 === this.p1 - this.prevP1;
-            }
-
             this.prevP0 = this.p0;
             this.prevP1 = this.p1;
             this.prevX0 = this.x0;
@@ -652,10 +651,6 @@ var ChartCanvas = function () {
             var _1 = this.getXI(this.p1);
             this.x1 = _1[0];
             this.i1 = _1[1];
-
-            if (isShift) {
-                this.i1 = this.i0 + this.prevI1 - this.prevI0;
-            }
 
             this.sourceHeight = this.getMaxHeight(this.prevSourceHeight);
             this.sourceOffset = v2(this.x0, 0);
@@ -817,7 +812,7 @@ var ChartCanvas = function () {
 
             var wt = this.timing('changeWidth');
             if (!wt || wt() === 1) {
-                this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
+                this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this), 200));
             }
             var newSteps = [];
             var from = this.i0 % 2 ? this.i0 + 1 : this.i0;
@@ -831,7 +826,6 @@ var ChartCanvas = function () {
                 }
                 newSteps = steps;
             }
-            //         console.log('I: ', this.i0, ',', this.i1, 'TF', from, ',', to, '||', newSteps.length, newSteps);
             if (newSteps.length) {
                 this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(function (v) {
                     return newSteps.indexOf(v) === -1;
@@ -854,7 +848,7 @@ var ChartCanvas = function () {
     }, {
         key: 'handleYRangeChanged',
         value: function handleYRangeChanged() {
-            var t = this.timing('changeHeight', timing(600));
+            var t = this.timing('changeHeight', timing(600, null, 100));
             var current = this.sourceArea.y;
             this.prevYRulers = this.yRulers;
             this.yRulers = splitRange(0, this.sourceHeight, this.yRangeSteps);
