@@ -537,6 +537,7 @@ var ChartCanvas = function () {
         this.lastUpdate = Date.now();
         if (this.hasRulers) {
             this.setEvents();
+            this.noBodyScroll();
         }
         this.update = this.update.bind(this);
         this.render();
@@ -922,7 +923,7 @@ var ChartCanvas = function () {
             var v = scale(sub(v2(x, 0), this.sourceOffset), this.factor);
             this.context2d.font = "28px Arial";
             this.context2d.fillStyle = withAlpha(this.theme.get('rulerName'), alpha);
-            this.context2d.fillText(label, v.x - 50, this.plotArea.y + this.plotAreaPadding.y + 40);
+            this.context2d.fillText(label, v.x, this.plotArea.y + this.plotAreaPadding.y + 40);
         }
     }, {
         key: 'renderYRulers',
