@@ -1009,7 +1009,7 @@ var ChartCanvas = function () {
             // Tooltip
             var rectWidth = 130 * getDpr();
             var rectHeight = 50 * getDpr() * (Math.ceil(lineNames.length / 1) + 1);
-            var rectX = points[anyLine].p.x + rectWidth > this.width ? points[anyLine].p.x - rectWidth - 30 : points[anyLine].p.x + 30;
+            var rectX = points[anyLine].p.x + rectWidth > this.width ? points[anyLine].p.x - rectWidth - 30 * getDpr() : points[anyLine].p.x + 30 * getDpr();
             var rectY = 10;
             var r = 40;
             // const rsq = Math.sqrt(r*r);

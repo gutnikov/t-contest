@@ -379,7 +379,7 @@ class ChartCanvas {
         if (newSteps.length) {
             this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(v => newSteps.indexOf(v) === -1));
             this.xRulersIn = newSteps.filter(v => this.xRulers.indexOf(v) === -1);
-            this.xRulers = this.xRulers.filter(v => newSteps.indexOf(v) !== -1);            
+            this.xRulers = this.xRulers.filter(v => newSteps.indexOf(v) !== -1);
         }
     }
 
@@ -537,8 +537,8 @@ class ChartCanvas {
         const rectWidth = 130 * getDpr();
         const rectHeight = 50 * getDpr() * (Math.ceil(lineNames.length / 1) + 1);
         const rectX = points[anyLine].p.x + rectWidth > this.width ?
-            points[anyLine].p.x - rectWidth - 30 :
-            points[anyLine].p.x + 30;
+            points[anyLine].p.x - rectWidth - 30 * getDpr() :
+            points[anyLine].p.x + 30 * getDpr();
         const rectY = 10;
         const r = 40;
         // const rsq = Math.sqrt(r*r);
