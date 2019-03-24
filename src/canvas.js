@@ -120,17 +120,17 @@ class ChartCanvas {
     noBodyScroll() {
         let canvas = this.tooltipCanvas;
         document.body.addEventListener("touchstart", function (e) {
-            if (e.target == canvas) {
+            if (e.target === canvas) {
                 e.preventDefault();
             }
         }, false);
         document.body.addEventListener("touchend", function (e) {
-            if (e.target == canvas) {
+            if (e.target === canvas) {
                 e.preventDefault();
             }
         }, false);
         document.body.addEventListener("touchmove", function (e) {
-            if (e.target == canvas) {
+            if (e.target === canvas) {
                 e.preventDefault();
             }
         }, false);
@@ -154,6 +154,7 @@ class ChartCanvas {
         this.linesEnabled = Object.assign({}, this.linesEnabled, {
             [name]: isEnabled
         });
+        this.timing('line:' + name, timing(600));
         this.linesChanged = true;
     }
 
@@ -334,9 +335,6 @@ class ChartCanvas {
             if (this.sourceHeight !== this.prevSourceHeight) {
                 this.handleYRangeChanged();
             }
-            if (this.linesChanged) {
-                this.handleLinesChanged();
-            }
             this.prevP0 = this.p0;
             this.prevP1 = this.p1;
             this.prevX0 = this.x0;
@@ -388,13 +386,6 @@ class ChartCanvas {
             this.factor = map(this.sourceArea, this.plotArea);
             return tv === 1;
         });
-    }
-
-    handleLinesChanged() {
-        const lines = this.getActiveLines();
-        Object.keys(lines).forEach(function(name) {
-            this.timing('line:' + name, timing(600));
-        }, this);
     }
 
     render() {

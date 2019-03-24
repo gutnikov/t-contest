@@ -341,21 +341,21 @@ var Ruler = function () {
         value: function noBodyScroll() {
             var canvas = this.canvas;
             document.body.addEventListener("touchstart", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     try {
                         e.preventDefault();
                     } catch (e) {}
                 }
             }, false);
             document.body.addEventListener("touchend", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     try {
                         e.preventDefault();
                     } catch (e) {}
                 }
             }, false);
             document.body.addEventListener("touchmove", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     try {
                         e.preventDefault();
                     } catch (e) {}
@@ -591,17 +591,17 @@ var ChartCanvas = function () {
         value: function noBodyScroll() {
             var canvas = this.tooltipCanvas;
             document.body.addEventListener("touchstart", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     e.preventDefault();
                 }
             }, false);
             document.body.addEventListener("touchend", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     e.preventDefault();
                 }
             }, false);
             document.body.addEventListener("touchmove", function (e) {
-                if (e.target == canvas) {
+                if (e.target === canvas) {
                     e.preventDefault();
                 }
             }, false);
@@ -626,6 +626,7 @@ var ChartCanvas = function () {
         value: function setLineEnabled(name, isEnabled) {
             this.prevLinesEnabled = this.linesEnabled;
             this.linesEnabled = Object.assign({}, this.linesEnabled, _defineProperty({}, name, isEnabled));
+            this.timing('line:' + name, timing(600));
             this.linesChanged = true;
         }
     }, {
@@ -785,9 +786,6 @@ var ChartCanvas = function () {
                 if (this.sourceHeight !== this.prevSourceHeight) {
                     this.handleYRangeChanged();
                 }
-                if (this.linesChanged) {
-                    this.handleLinesChanged();
-                }
                 this.prevP0 = this.p0;
                 this.prevP1 = this.p1;
                 this.prevX0 = this.x0;
@@ -852,14 +850,6 @@ var ChartCanvas = function () {
                 this.factor = map(this.sourceArea, this.plotArea);
                 return tv === 1;
             });
-        }
-    }, {
-        key: 'handleLinesChanged',
-        value: function handleLinesChanged() {
-            var lines = this.getActiveLines();
-            Object.keys(lines).forEach(function (name) {
-                this.timing('line:' + name, timing(600));
-            }, this);
         }
     }, {
         key: 'render',
