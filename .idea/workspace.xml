@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba34a644-b80b-427f-97a0-cd549fc4fd77" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/base.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/base.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/canvas.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/canvas.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/theme.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/theme.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,20 +57,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/canvas.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="176" lean-forward="true" selection-start-line="176" selection-end-line="176" />
+            <state relative-caret-position="289">
+              <caret line="173" column="22" selection-start-line="173" selection-start-column="22" selection-end-line="173" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="10" selection-start-line="11" selection-start-column="10" selection-end-line="11" selection-end-column="10" />
+            <state relative-caret-position="374">
+              <caret line="22" column="40" selection-start-line="22" selection-start-column="40" selection-end-line="22" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -148,10 +146,10 @@
         <option value="$PROJECT_DIR$/src/app.js" />
         <option value="$PROJECT_DIR$/src/ruler.js" />
         <option value="$PROJECT_DIR$/src/styles.css" />
-        <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/src/theme.js" />
         <option value="$PROJECT_DIR$/src/base.js" />
         <option value="$PROJECT_DIR$/src/canvas.js" />
+        <option value="$PROJECT_DIR$/index.html" />
       </list>
     </option>
   </component>
@@ -228,7 +226,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="82690000" />
+    <option name="totallyTimeSpent" value="82767000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="48" y="23" width="1392" height="877" extended-state="0" />
@@ -334,13 +332,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="10" selection-start-line="11" selection-start-column="10" selection-end-line="11" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/data.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -357,8 +348,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/canvas.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="176" lean-forward="true" selection-start-line="176" selection-end-line="176" />
+        <state relative-caret-position="289">
+          <caret line="173" column="22" selection-start-line="173" selection-start-column="22" selection-end-line="173" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="40" selection-start-line="22" selection-start-column="40" selection-end-line="22" selection-end-column="40" />
         </state>
       </provider>
     </entry>
