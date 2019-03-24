@@ -640,16 +640,16 @@ var ChartCanvas = function () {
     }, {
         key: 'fps',
         value: function fps() {
-            if (!this.curFps) {
-                this.curFps = 1;
-                this.lastCall = Date.now();
-            }
-            if (Date.now() - this.lastCall > 1000) {
-                document.getElementById('fps').innerHTML = 'FPS = ' + this.curFps;
-                this.curFps = 0;
-                this.lastCall = Date.now();
-            }
-            this.curFps++;
+            // if (!this.curFps) {
+            //     this.curFps = 1;
+            //     this.lastCall = Date.now();
+            // }
+            // if (Date.now() - this.lastCall > 1000) {
+            //     document.getElementById('fps').innerHTML = 'FPS = ' + this.curFps;
+            //     this.curFps = 0;
+            //     this.lastCall = Date.now();
+            // }
+            // this.curFps++;
         }
     }, {
         key: 'timing',
@@ -1087,9 +1087,7 @@ function chartAt(parent, data) {
 
 var container = document.getElementById('container');
 
-// window.data.forEach(function(data) {
-//     chartAt(container, data);
-// });
-
-chartAt(container, data[2]);
+window.data.forEach(function (data) {
+    chartAt(container, data);
+});
 

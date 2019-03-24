@@ -208,16 +208,16 @@ class ChartCanvas {
     }
 
     fps() {
-        if (!this.curFps) {
-            this.curFps = 1;
-            this.lastCall = Date.now();
-        }
-        if (Date.now() - this.lastCall > 1000) {
-            document.getElementById('fps').innerHTML = 'FPS = ' + this.curFps;
-            this.curFps = 0;
-            this.lastCall = Date.now();
-        }
-        this.curFps++;
+        // if (!this.curFps) {
+        //     this.curFps = 1;
+        //     this.lastCall = Date.now();
+        // }
+        // if (Date.now() - this.lastCall > 1000) {
+        //     document.getElementById('fps').innerHTML = 'FPS = ' + this.curFps;
+        //     this.curFps = 0;
+        //     this.lastCall = Date.now();
+        // }
+        // this.curFps++;
     }
 
     timing(name, value) {

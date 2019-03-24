@@ -113,8 +113,7 @@ function chartAt(parent, data) {
 
 const container = document.getElementById('container');
 
-// window.data.forEach(function(data) {
-//     chartAt(container, data);
-// });
+window.data.forEach(function(data) {
+    chartAt(container, data);
+});
 
-chartAt(container, data[2]);
