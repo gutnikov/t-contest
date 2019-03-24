@@ -159,6 +159,11 @@ class ChartCanvas {
     }
 
     setFromPct() {
+        let isShift = false;
+        if (Number.isFinite(this.prevP0) && Number.isFinite(this.prevP1)) {
+            isShift = this.p0 - this.prevP0 === this.p1 - this.prevP1;
+        }
+
         this.prevP0 = this.p0;
         this.prevP1 = this.p1;
         this.prevX0 = this.x0;
@@ -174,6 +179,10 @@ class ChartCanvas {
         const _1 = this.getXI(this.p1);
         this.x1 = _1[0];
         this.i1 = _1[1];
+
+        if (isShift) {
+            this.i1 = this.i0 + this.prevI1 - this.prevI0;
+        }
 
         this.sourceHeight = this.getMaxHeight(this.prevSourceHeight);
         this.sourceOffset = v2(this.x0, 0);
@@ -244,7 +253,7 @@ class ChartCanvas {
     }
 
     getXI(p) {
-        const x = this.xFirst + this.xSize * (p);
+        const x = Math.round(this.xFirst + this.xSize * (p));
         const i = this.x.findIndex(v => v >= x);
         return [x, i];
     }
@@ -357,16 +366,21 @@ class ChartCanvas {
             this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
         }
         let newSteps = [];
+        let from = this.i0 % 2 ? this.i0 + 1 : this.i0;
+        let to = this.i1 %2 ? this.i1 + 1 : this.i1;
         for (let i = 0; i < this.stepsScale.length; i++) {
-            let steps = this.stepsScale[i].filter(v => v >= this.i0 && v <= this.i1);
-            if (steps.length > this.xRangeSteps) {
+            let steps = this.stepsScale[i].filter(v => v >= from && v <= to);
+            if (steps.length > this.xRangeSteps + 1) {
                 break;
             }
             newSteps = steps;
         }
-        this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(v => newSteps.indexOf(v) === -1));
-        this.xRulersIn = newSteps.filter(v => this.xRulers.indexOf(v) === -1);
-        this.xRulers = this.xRulers.filter(v => newSteps.indexOf(v) !== -1);
+//         console.log('I: ', this.i0, ',', this.i1, 'TF', from, ',', to, '||', newSteps.length, newSteps);
+        if (newSteps.length) {
+            this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(v => newSteps.indexOf(v) === -1));
+            this.xRulersIn = newSteps.filter(v => this.xRulers.indexOf(v) === -1);
+            this.xRulers = this.xRulers.filter(v => newSteps.indexOf(v) !== -1);            
+        }
     }
 
     handleWidthTimingDone() {

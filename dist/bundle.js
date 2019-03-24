@@ -339,28 +339,29 @@ var Ruler = function () {
     }, {
         key: 'noBodyScroll',
         value: function noBodyScroll() {
-            var canvas = this.canvas;
-            document.body.addEventListener("touchstart", function (e) {
-                if (e.target === canvas) {
-                    try {
-                        e.preventDefault();
-                    } catch (e) {}
-                }
-            }, false);
-            document.body.addEventListener("touchend", function (e) {
-                if (e.target === canvas) {
-                    try {
-                        e.preventDefault();
-                    } catch (e) {}
-                }
-            }, false);
-            document.body.addEventListener("touchmove", function (e) {
-                if (e.target === canvas) {
-                    try {
-                        e.preventDefault();
-                    } catch (e) {}
-                }
-            }, false);
+            // let canvas = this.canvas;
+            // document.body.addEventListener("touchstart", function (e) {
+            //     if (e.target === canvas) {
+            //         try {
+            //             e.preventDefault();
+            //          } catch(e) {}
+            //     }
+            // }, false);
+            // document.body.addEventListener("touchend", function (e) {
+            //     if (e.target === canvas) {
+            //         try {
+            //             e.preventDefault();
+            //         } catch(e) {}
+            //     }
+            // }, false);
+            // document.body.addEventListener("touchmove", function (e) {
+            //     if (e.target === canvas) {
+            //         try {
+            //             e.preventDefault();
+            //         } catch(e) {}
+            //
+            //     }
+            // }, false);
         }
     }, {
         key: 'handleDown',
@@ -632,6 +633,11 @@ var ChartCanvas = function () {
     }, {
         key: 'setFromPct',
         value: function setFromPct() {
+            var isShift = false;
+            if (Number.isFinite(this.prevP0) && Number.isFinite(this.prevP1)) {
+                isShift = this.p0 - this.prevP0 === this.p1 - this.prevP1;
+            }
+
             this.prevP0 = this.p0;
             this.prevP1 = this.p1;
             this.prevX0 = this.x0;
@@ -647,6 +653,10 @@ var ChartCanvas = function () {
             var _1 = this.getXI(this.p1);
             this.x1 = _1[0];
             this.i1 = _1[1];
+
+            if (isShift) {
+                this.i1 = this.i0 + this.prevI1 - this.prevI0;
+            }
 
             this.sourceHeight = this.getMaxHeight(this.prevSourceHeight);
             this.sourceOffset = v2(this.x0, 0);
@@ -687,7 +697,7 @@ var ChartCanvas = function () {
     }, {
         key: 'getXI',
         value: function getXI(p) {
-            var x = this.xFirst + this.xSize * p;
+            var x = Math.round(this.xFirst + this.xSize * p);
             var i = this.x.findIndex(function (v) {
                 return v >= x;
             });
@@ -811,24 +821,29 @@ var ChartCanvas = function () {
                 this.timing('changeWidth', timing(500, this.handleWidthTimingDone.bind(this)));
             }
             var newSteps = [];
+            var from = this.i0 % 2 ? this.i0 + 1 : this.i0;
+            var to = this.i1 % 2 ? this.i1 + 1 : this.i1;
             for (var i = 0; i < this.stepsScale.length; i++) {
                 var steps = this.stepsScale[i].filter(function (v) {
-                    return v >= _this2.i0 && v <= _this2.i1;
+                    return v >= from && v <= to;
                 });
-                if (steps.length > this.xRangeSteps) {
+                if (steps.length > this.xRangeSteps + 1) {
                     break;
                 }
                 newSteps = steps;
             }
-            this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(function (v) {
-                return newSteps.indexOf(v) === -1;
-            }));
-            this.xRulersIn = newSteps.filter(function (v) {
-                return _this2.xRulers.indexOf(v) === -1;
-            });
-            this.xRulers = this.xRulers.filter(function (v) {
-                return newSteps.indexOf(v) !== -1;
-            });
+            //         console.log('I: ', this.i0, ',', this.i1, 'TF', from, ',', to, '||', newSteps.length, newSteps);
+            if (newSteps.length) {
+                this.xRulersOut = this.xRulersOut.concat(this.xRulers.filter(function (v) {
+                    return newSteps.indexOf(v) === -1;
+                }));
+                this.xRulersIn = newSteps.filter(function (v) {
+                    return _this2.xRulers.indexOf(v) === -1;
+                });
+                this.xRulers = this.xRulers.filter(function (v) {
+                    return newSteps.indexOf(v) !== -1;
+                });
+            }
         }
     }, {
         key: 'handleWidthTimingDone',
